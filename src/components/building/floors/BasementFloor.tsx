@@ -1,8 +1,9 @@
 "use client";
 
 import { useFrame } from "@react-three/fiber";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
+import photoshopIcon from "@/assets/photoshop-icon.png";
 import { Chair, Desk } from "@/components/building/furniture";
 import Hotspot from "@/components/building/Hotspot";
 import { Block, useCanvasTexture } from "@/components/building/parts";
@@ -92,6 +93,44 @@ function NoteBoard() {
   );
 }
 
+// 벽에 걸린 포토샵 아이콘. 그림의 정면을 앞면으로 쓰는 두꺼운 입체 블록입니다
+function IconFrame() {
+  const [icon, setIcon] = useState<THREE.Texture | null>(null);
+
+  useEffect(() => {
+    let loaded: THREE.Texture | null = null;
+    let cancelled = false;
+    new THREE.TextureLoader().load(photoshopIcon.src, (texture) => {
+      texture.colorSpace = THREE.SRGBColorSpace;
+      texture.anisotropy = 4;
+      loaded = texture;
+      if (cancelled) texture.dispose();
+      else setIcon(texture);
+    });
+    return () => {
+      cancelled = true;
+      loaded?.dispose();
+    };
+  }, []);
+
+  return (
+    <mesh position={[0.95, 2.25, -2.995]} castShadow receiveShadow>
+      <boxGeometry args={[0.91, 0.9, 0.21]} />
+      {/* 면 순서: 오른쪽, 왼쪽, 위, 아래, 앞, 뒤 */}
+      <meshStandardMaterial attach="material-0" color="#003a78" roughness={0.45} />
+      <meshStandardMaterial attach="material-1" color="#003a78" roughness={0.45} />
+      <meshStandardMaterial attach="material-2" color="#41d9fb" roughness={0.45} />
+      <meshStandardMaterial attach="material-3" color="#002a58" roughness={0.45} />
+      {icon ? (
+        <meshStandardMaterial key="face" attach="material-4" map={icon} roughness={0.4} />
+      ) : (
+        <meshStandardMaterial key="blank" attach="material-4" color="#0a55ad" roughness={0.4} />
+      )}
+      <meshStandardMaterial attach="material-5" color="#002a58" roughness={0.45} />
+    </mesh>
+  );
+}
+
 // 지하에서 유일하게 바깥이 보이는 높은 창
 function HighWindow() {
   return (
@@ -117,6 +156,7 @@ export default function BasementFloor({ interactive, seen, activeStoryId, onSele
   return (
     <group>
       <HighWindow />
+      <IconFrame />
       <SwingingBulb />
 
       {/* 벽을 따라 지나가는 배관 */}

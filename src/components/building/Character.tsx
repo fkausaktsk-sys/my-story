@@ -21,7 +21,7 @@ const PANTS = "#34405e";
 
 // 샛별 캐릭터: 계단을 걸어 다니고, 도착하면 책상에 앉아 일합니다
 // 머리 위 이름표. 항상 카메라를 향합니다
-function NameTag({ text }: { text: string }) {
+export function NameTag({ text, y = 2.05, size = 1 }: { text: string; y?: number; size?: number }) {
   const texture = useCanvasTexture(320, 96, (ctx) => {
     ctx.fillStyle = "rgba(20, 24, 42, 0.82)";
     ctx.strokeStyle = "rgba(255, 255, 255, 0.35)";
@@ -37,7 +37,7 @@ function NameTag({ text }: { text: string }) {
     ctx.fillText(text, 160, 50);
   });
   return (
-    <sprite position={[0, 2.05, 0]} scale={[1.33, 0.4, 1]} renderOrder={10}>
+    <sprite position={[0, y, 0]} scale={[1.33 * size, 0.4 * size, 1]} renderOrder={10}>
       <spriteMaterial map={texture} transparent depthTest={false} toneMapped={false} />
     </sprite>
   );

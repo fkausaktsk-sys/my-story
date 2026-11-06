@@ -22,6 +22,8 @@ export type Floor = {
   label: string;
   era: string;
   title: string;
+  // 그 시절의 도구
+  tools: string[];
   wall: string;
   stories: Story[];
 };
@@ -32,6 +34,7 @@ export const floors: Floor[] = [
     label: "B1",
     era: "2010~",
     title: "칸을 세며 화면을 배우다",
+    tools: ["table", "드림위버", "플래시"],
     wall: "#4a4034",
     stories: [
       {
@@ -79,6 +82,7 @@ export const floors: Floor[] = [
     label: "1F",
     era: "2012~",
     title: "화면 밖까지 맡다",
+    tools: ["포토샵", "일러스트", "인쇄물"],
     wall: "#3d4658",
     stories: [
       {
@@ -118,11 +122,43 @@ export const floors: Floor[] = [
     ],
   },
   // 2F의 div 전환, 4F의 피그마 전환 시기는 사용자 확인 후 조정합니다
-  { id: "2f", label: "2F", era: "2013~", title: "많이 만들며 패턴을 보다", wall: "#3c5350", stories: [] },
-  { id: "3f", label: "3F", era: "2015~", title: "혼자 끝까지 책임지다", wall: "#54465e", stories: [] },
-  { id: "4f", label: "4F", era: "2018~", title: "그리기 전에 듣다", wall: "#5c4a3f", stories: [] },
-  { id: "5f", label: "5F", era: "2024~", title: "빨라진 만큼 더 판단하다", wall: "#2f4468", stories: [] },
-  { id: "rf", label: "RF", era: "지금", title: "다음 층을 찾다", wall: "#26304f", stories: [] },
+  {
+    id: "2f",
+    label: "2F",
+    era: "2013~",
+    title: "많이 만들며 패턴을 보다",
+    tools: ["대량 배너", "기획전", "div·CSS"],
+    wall: "#3c5350",
+    stories: [],
+  },
+  {
+    id: "3f",
+    label: "3F",
+    era: "2015~",
+    title: "혼자 끝까지 책임지다",
+    tools: ["반응형", "워드프레스", "카페24", "캠페인"],
+    wall: "#54465e",
+    stories: [],
+  },
+  {
+    id: "4f",
+    label: "4F",
+    era: "2018~",
+    title: "그리기 전에 듣다",
+    tools: ["피그마", "UX 리서치", "디자인 시스템"],
+    wall: "#5c4a3f",
+    stories: [],
+  },
+  {
+    id: "5f",
+    label: "5F",
+    era: "2024~",
+    title: "빨라진 만큼 더 판단하다",
+    tools: ["AI 이미지", "Claude Code"],
+    wall: "#2f4468",
+    stories: [],
+  },
+  { id: "rf", label: "RF", era: "지금", title: "다음 층을 찾다", tools: ["다음 회사"], wall: "#26304f", stories: [] },
 ];
 
 export const FLOOR_HEIGHT = 3.8;

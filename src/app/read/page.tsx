@@ -23,6 +23,7 @@ export default function ReadPage() {
               {floor.label} · {floor.era}
             </p>
             <h2 className="mt-2 text-2xl font-semibold">{floor.title}</h2>
+            <p className="mt-2 text-sm text-muted">{floor.tools.join(" · ")}</p>
             {floor.stories.length === 0 ? (
               <p className="mt-4 text-muted">이 층의 이야기는 준비 중입니다.</p>
             ) : (

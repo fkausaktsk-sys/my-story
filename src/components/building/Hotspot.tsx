@@ -42,20 +42,24 @@ export default function Hotspot({ id, label, seen, active, enabled, onSelect, ch
     document.body.style.cursor = "";
   };
   const handleClick = (event: ThreeEvent<MouseEvent>) => {
-    if (!enabled) return;
+    // 시점을 돌리려고 끈 동작은 클릭으로 치지 않습니다
+    if (!enabled || event.delta > 6) return;
     event.stopPropagation();
     onSelect(id);
   };
 
   return (
-    <group ref={groupRef} onPointerOver={handleOver} onPointerOut={handleOut} onClick={handleClick}>
-      {children}
-      {enabled && !seen && (
-        <mesh ref={markerRef} position={label}>
-          <octahedronGeometry args={[0.15, 0]} />
-          <meshBasicMaterial color="#ffc56e" toneMapped={false} />
-        </mesh>
-      )}
+    // 방 중심이 아니라 소품 위치를 기준으로 커져야 벽에 붙은 소품이 벽 속으로 밀리지 않습니다
+    <group ref={groupRef} position={label} onPointerOver={handleOver} onPointerOut={handleOut} onClick={handleClick}>
+      <group position={[-label[0], -label[1], -label[2]]}>
+        {children}
+        {enabled && !seen && (
+          <mesh ref={markerRef} position={label}>
+            <octahedronGeometry args={[0.15, 0]} />
+            <meshBasicMaterial color="#ffc56e" toneMapped={false} />
+          </mesh>
+        )}
+      </group>
     </group>
   );
 }

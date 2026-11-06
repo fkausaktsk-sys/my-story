@@ -34,6 +34,9 @@ export default function Experience() {
   const [openStoryId, setOpenStoryId] = useState<string | null>(null);
   const [seen, setSeen] = useState<ReadonlySet<string>>(() => new Set());
   const [contextLost, setContextLost] = useState(false);
+  const [rotated, setRotated] = useState(false);
+  const [hasRotated, setHasRotated] = useState(false);
+  const [viewResetKey, setViewResetKey] = useState(0);
   const webgl = useSyncExternalStore(subscribeNothing, canUseWebGL, () => true);
 
   const floor = floors[floorIndex];
@@ -49,6 +52,14 @@ export default function Experience() {
   const closeStory = useCallback(() => setOpenStoryId(null), []);
   const arrive = useCallback(() => setMoving(false), []);
   const loseContext = useCallback(() => setContextLost(true), []);
+  const changeRotated = useCallback((next: boolean) => {
+    setRotated(next);
+    if (next) setHasRotated(true);
+  }, []);
+  const resetView = () => {
+    setRotated(false);
+    setViewResetKey((key) => key + 1);
+  };
 
   const moveTo = (index: number) => {
     if (moving || index === floorIndex) return;
@@ -81,6 +92,8 @@ export default function Experience() {
           onSelectStory={selectStory}
           onArrive={arrive}
           onContextLost={loseContext}
+          viewResetKey={viewResetKey}
+          onRotatedChange={changeRotated}
         />
       </div>
 
@@ -114,12 +127,13 @@ export default function Experience() {
 
       {started && (
         <>
-          <header className="glass absolute left-3 top-3 max-w-[calc(100vw-7.5rem)] rounded-2xl px-4 py-2.5 md:left-6 md:top-6 md:max-w-md md:rounded-full md:px-6 md:py-3">
+          <header className="glass absolute left-3 top-3 max-w-[calc(100vw-7.5rem)] rounded-2xl px-4 py-2.5 md:left-6 md:top-6 md:max-w-md md:rounded-3xl md:px-6 md:py-3">
             <p className="text-sm font-bold">
               <span className="text-accent">{floor.label}</span>
               <span className="ml-2 font-medium text-muted">{floor.era}</span>
             </p>
             <h2 className="mt-0.5 text-sm font-medium md:text-base">{floor.title}</h2>
+            <p className="mt-1 text-xs leading-relaxed text-muted md:text-sm">{floor.tools.join(" · ")}</p>
           </header>
           <Link
             href="/read"
@@ -127,6 +141,20 @@ export default function Experience() {
           >
             글로 읽기
           </Link>
+          {rotated && (
+            <button
+              type="button"
+              onClick={resetView}
+              className="glass absolute right-3 top-16 rounded-full px-4 py-2.5 text-sm font-medium md:right-6 md:top-22 md:px-5 md:py-3"
+            >
+              원래 시점
+            </button>
+          )}
+          {!hasRotated && !moving && !openStory && (
+            <p className="glass pointer-events-none absolute bottom-29 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-4 py-2 text-xs font-medium md:bottom-32">
+              드래그해서 둘러보기
+            </p>
+          )}
           <Dock
             currentIndex={floorIndex}
             moving={moving}

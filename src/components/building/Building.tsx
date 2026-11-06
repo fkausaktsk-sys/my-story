@@ -6,6 +6,7 @@ import * as THREE from "three";
 import Character from "@/components/building/Character";
 import BasementFloor, { type FloorSceneProps } from "@/components/building/floors/BasementFloor";
 import PhotoshopFloor from "@/components/building/floors/PhotoshopFloor";
+import Teammates from "@/components/building/Teammates";
 import { Block, useCanvasTexture } from "@/components/building/parts";
 import { FLOOR_HEIGHT, type Floor, floorBaseY, floors } from "@/data/floors";
 import { avatar } from "@/lib/avatar";
@@ -215,6 +216,7 @@ export default function Building({
         );
       })}
       <Character floorIndex={floorIndex} reduced={reduced} onArrive={onArrive} />
+      {interactive && <Teammates key={floorIndex} floorIndex={floorIndex} reduced={reduced} />}
     </group>
   );
 }
