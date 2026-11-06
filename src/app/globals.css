@@ -1,0 +1,66 @@
+@import "tailwindcss";
+
+/* 디자인 토큰 — 밤의 빌딩 분위기에 맞춘 어두운 테마만 사용합니다 */
+:root {
+  color-scheme: dark;
+  --background: #0b0e1a;
+  --foreground: #f4f1e8;
+  --muted: #a7a8b4;
+  --line: #2b3046;
+  --surface: #141829;
+  --accent: #ffc56e;
+}
+
+@theme inline {
+  --color-background: var(--background);
+  --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-surface: var(--surface);
+  --color-accent: var(--accent);
+  --font-sans: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, sans-serif;
+}
+
+body {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-sans);
+  word-break: keep-all;
+}
+
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* 화면 위에 뜬 반투명 유리 UI */
+.glass,
+.glass-strong {
+  border: 1px solid rgb(255 255 255 / 0.2);
+  color: var(--foreground);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.18),
+    0 10px 32px rgb(4 6 16 / 0.42);
+  -webkit-backdrop-filter: blur(16px) saturate(1.5);
+  backdrop-filter: blur(16px) saturate(1.5);
+}
+
+.glass {
+  background: rgb(26 30 50 / 0.46);
+}
+
+/* 긴 글을 읽는 카드는 조금 더 불투명하게 합니다 */
+.glass-strong {
+  background: rgb(20 24 42 / 0.74);
+  -webkit-backdrop-filter: blur(22px) saturate(1.5);
+  backdrop-filter: blur(22px) saturate(1.5);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    transition-duration: 0.01ms !important;
+  }
+}

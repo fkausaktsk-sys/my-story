@@ -1,0 +1,21 @@
+# 의존성
+/node_modules
+
+# Next.js
+/.next/
+/out/
+next-env.d.ts
+*.tsbuildinfo
+
+# 기타
+.DS_Store
+.env*
+.vercel
+npm-debug.log*
+
+# 프롬프트 기록은 커밋하지 않습니다
+PROMPT_HISTORY.md
+
+# 공개 저장소에 올리지 않는 개인 기획 자료와 참고 이미지
+FLOOR_PLAN.md
+/img/
