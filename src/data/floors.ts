@@ -30,8 +30,8 @@ export const floors: Floor[] = [
   {
     id: "b1",
     label: "B1",
-    era: "2010",
-    title: "table로 화면을 짜던 지하 작업실",
+    era: "2010~",
+    title: "칸을 세며 화면을 배우다",
     wall: "#4a4034",
     stories: [
       {
@@ -77,8 +77,8 @@ export const floors: Floor[] = [
   {
     id: "1f",
     label: "1F",
-    era: "연도 확인 필요",
-    title: "포토샵으로 한 땀씩 자르던 시절",
+    era: "2012~",
+    title: "화면 밖까지 맡다",
     wall: "#3d4658",
     stories: [
       {
@@ -117,11 +117,12 @@ export const floors: Floor[] = [
       },
     ],
   },
-  { id: "2f", label: "2F", era: "연도 확인 필요", title: "div와 CSS로 넘어오다", wall: "#3c5350", stories: [] },
-  { id: "3f", label: "3F", era: "연도 확인 필요", title: "화면이 하나가 아니게 되다", wall: "#54465e", stories: [] },
-  { id: "4f", label: "4F", era: "연도 확인 필요", title: "피그마와 디자인 시스템", wall: "#5c4a3f", stories: [] },
-  { id: "5f", label: "5F", era: "2026", title: "AI와 함께 만드는 지금", wall: "#2f4468", stories: [] },
-  { id: "rf", label: "RF", era: "지금", title: "샛별이 보이는 옥상", wall: "#26304f", stories: [] },
+  // 2F의 div 전환, 4F의 피그마 전환 시기는 사용자 확인 후 조정합니다
+  { id: "2f", label: "2F", era: "2013~", title: "많이 만들며 패턴을 보다", wall: "#3c5350", stories: [] },
+  { id: "3f", label: "3F", era: "2015~", title: "혼자 끝까지 책임지다", wall: "#54465e", stories: [] },
+  { id: "4f", label: "4F", era: "2018~", title: "그리기 전에 듣다", wall: "#5c4a3f", stories: [] },
+  { id: "5f", label: "5F", era: "2024~", title: "빨라진 만큼 더 판단하다", wall: "#2f4468", stories: [] },
+  { id: "rf", label: "RF", era: "지금", title: "다음 층을 찾다", wall: "#26304f", stories: [] },
 ];
 
 export const FLOOR_HEIGHT = 3.8;
