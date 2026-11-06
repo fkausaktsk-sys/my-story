@@ -23,3 +23,15 @@ export function Chair({ color = "#2f3545" }: { color?: string }) {
     </group>
   );
 }
+
+// 책상 위 평면 모니터. 화면은 children으로 넘깁니다
+export function Monitor({ x, turn = 0, children }: { x: number; turn?: number; children: React.ReactNode }) {
+  return (
+    <group position={[x, 1.82, -2.1]} rotation={[0, turn, 0]}>
+      <Block size={[1.36, 0.92, 0.09]} position={[0, 0.1, 0]} color="#22252c" />
+      <Block size={[0.12, 0.42, 0.12]} position={[0, -0.54, -0.04]} color="#31343c" />
+      <Block size={[0.54, 0.05, 0.4]} position={[0, -0.74, 0]} color="#31343c" />
+      {children}
+    </group>
+  );
+}

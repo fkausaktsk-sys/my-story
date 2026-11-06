@@ -4,8 +4,12 @@ import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import * as THREE from "three";
 import Character from "@/components/building/Character";
+import AiFloor from "@/components/building/floors/AiFloor";
+import BannerFloor from "@/components/building/floors/BannerFloor";
 import BasementFloor, { type FloorSceneProps } from "@/components/building/floors/BasementFloor";
 import PhotoshopFloor from "@/components/building/floors/PhotoshopFloor";
+import ResponsiveFloor from "@/components/building/floors/ResponsiveFloor";
+import SystemFloor from "@/components/building/floors/SystemFloor";
 import Teammates from "@/components/building/Teammates";
 import { Block, useCanvasTexture } from "@/components/building/parts";
 import { FLOOR_HEIGHT, type Floor, floorBaseY, floors } from "@/data/floors";
@@ -17,6 +21,10 @@ const ROOM = { width: 10, depth: 6.4, wall: 0.2 };
 const FLOOR_SCENES: Record<string, React.ComponentType<FloorSceneProps>> = {
   b1: BasementFloor,
   "1f": PhotoshopFloor,
+  "2f": BannerFloor,
+  "3f": ResponsiveFloor,
+  "4f": SystemFloor,
+  "5f": AiFloor,
 };
 
 type Props = FloorSceneProps & {

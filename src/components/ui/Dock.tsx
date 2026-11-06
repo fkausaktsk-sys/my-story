@@ -68,7 +68,7 @@ export default function Dock({ currentIndex, moving, seen, onMove, onSelectStory
             key={story.id}
             type="button"
             onClick={() => onSelectStory(story.id)}
-            className="relative flex w-15 shrink-0 flex-col items-center gap-1 rounded-2xl px-0.5 py-2 text-[11px] font-medium leading-tight transition-colors hover:bg-white/10 md:w-22 md:px-1 md:text-[13px]"
+            className="relative flex w-13 shrink-0 flex-col items-center gap-1 rounded-2xl px-0.5 py-2 text-[11px] font-medium leading-tight transition-colors hover:bg-white/10 md:w-22 md:px-1 md:text-[13px]"
           >
             <Icon name={story.icon} />
             <span className="text-center">{story.name}</span>
@@ -85,7 +85,7 @@ export default function Dock({ currentIndex, moving, seen, onMove, onSelectStory
           <button
             type="button"
             onClick={() => move(currentIndex + 1)}
-            className={`flex w-17 shrink-0 flex-col items-center gap-1 rounded-2xl px-0.5 py-2 text-[11px] font-bold leading-tight transition-colors md:w-22 md:px-1 md:text-[13px] ${
+            className={`flex w-15 shrink-0 flex-col items-center gap-1 rounded-2xl px-0.5 py-2 text-[11px] font-bold leading-tight transition-colors md:w-22 md:px-1 md:text-[13px] ${
               allSeen ? "bg-accent text-background" : "text-accent hover:bg-white/10"
             }`}
           >
@@ -97,7 +97,7 @@ export default function Dock({ currentIndex, moving, seen, onMove, onSelectStory
           type="button"
           aria-expanded={listOpen}
           onClick={() => setListOpen((open) => !open)}
-          className="flex w-12 shrink-0 flex-col items-center gap-1 rounded-2xl px-0.5 py-2 text-[11px] font-medium leading-tight transition-colors hover:bg-white/10 md:w-16 md:px-1 md:text-[13px]"
+          className="flex w-11 shrink-0 flex-col items-center gap-1 rounded-2xl px-0.5 py-2 text-[11px] font-medium leading-tight transition-colors hover:bg-white/10 md:w-16 md:px-1 md:text-[13px]"
         >
           <Icon name="list" />
           <span>층 목록</span>

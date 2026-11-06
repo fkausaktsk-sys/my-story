@@ -131,6 +131,72 @@ function IconFrame() {
   );
 }
 
+// 첫 회사에서 만들던 행사들의 포스터
+function EventPoster({ z, color, title }: { z: number; color: string; title: string }) {
+  const texture = useCanvasTexture(240, 340, (ctx) => {
+    ctx.fillStyle = color;
+    ctx.fillRect(0, 0, 240, 340);
+    ctx.fillStyle = "rgba(255, 255, 255, 0.2)";
+    ctx.beginPath();
+    ctx.arc(190, 70, 90, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "800 44px Pretendard, sans-serif";
+    ctx.fillText(title, 20, 210);
+    ctx.font = "500 22px Pretendard, sans-serif";
+    ctx.fillText("2010", 22, 250);
+    ctx.fillRect(22, 280, 110, 8);
+  });
+  return (
+    <mesh position={[-4.87, 2.72, z]} rotation={[0, Math.PI / 2, 0]}>
+      <planeGeometry args={[0.56, 0.8]} />
+      <meshStandardMaterial map={texture} roughness={0.85} />
+    </mesh>
+  );
+}
+
+function EventPosters() {
+  return (
+    <group>
+      <EventPoster z={0.35} color="#2f6c8f" title="포럼" />
+      <EventPoster z={1.05} color="#a8503f" title="총회" />
+      <EventPoster z={1.75} color="#4b6f4a" title="국제회의" />
+    </group>
+  );
+}
+
+// 플래시 타임라인 화면. 특정 프로그램이 아니라 그 시절 분위기를 그렸습니다
+function FlashScreen() {
+  const texture = useCanvasTexture(420, 320, (ctx) => {
+    ctx.fillStyle = "#2b2c31";
+    ctx.fillRect(0, 0, 420, 320);
+    ctx.fillStyle = "#f4f1e8";
+    ctx.fillRect(50, 20, 320, 150);
+    ctx.fillStyle = "#e5484d";
+    ctx.beginPath();
+    ctx.arc(210, 95, 42, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.fillStyle = "#3a3b42";
+    ctx.fillRect(0, 186, 420, 134);
+    for (let row = 0; row < 3; row += 1) {
+      for (let cell = 0; cell < 34; cell += 1) {
+        ctx.fillStyle = cell % 5 === 0 ? "#585a63" : "#4a4b53";
+        ctx.fillRect(12 + cell * 12, 200 + row * 38, 11, 30);
+      }
+      ctx.fillStyle = "#ffcf70";
+      ctx.fillRect(12 + (row + 1) * 60, 200 + row * 38, 11, 30);
+    }
+    ctx.fillStyle = "#e5484d";
+    ctx.fillRect(190, 190, 3, 130);
+  });
+  return (
+    <mesh position={[0, 0.02, 0.356]}>
+      <planeGeometry args={[0.72, 0.55]} />
+      <meshStandardMaterial map={texture} emissiveMap={texture} emissive="#ffffff" emissiveIntensity={0.9} />
+    </mesh>
+  );
+}
+
 // 지하에서 유일하게 바깥이 보이는 높은 창
 function HighWindow() {
   return (
@@ -164,10 +230,6 @@ export default function BasementFloor({ interactive, seen, activeStoryId, onSele
         <cylinderGeometry args={[0.07, 0.07, 9.8, 10]} />
         <meshStandardMaterial color="#6e6660" metalness={0.5} roughness={0.5} />
       </mesh>
-      <mesh position={[-4.75, 3.05, 0]} rotation={[Math.PI / 2, 0, 0]} castShadow>
-        <cylinderGeometry args={[0.05, 0.05, 6.2, 10]} />
-        <meshStandardMaterial color="#7a5a46" metalness={0.4} roughness={0.55} />
-      </mesh>
 
       {/* 바닥 깔개 */}
       <Block size={[4.4, 0.03, 3.4]} position={[-0.6, 0.015, -0.6]} color="#5b3f36" />
@@ -195,13 +257,15 @@ export default function BasementFloor({ interactive, seen, activeStoryId, onSele
       <Block size={[0.32, 0.05, 0.02]} position={[-1.85, 1.86, -1.415]} color="#2a2a2a" />
 
       {/* 메모판 */}
-      <Hotspot {...state("notes")} {...shared} label={[-4.5, 3.15, -1.5]}>
-        <NoteBoard />
+      <NoteBoard />
+
+      {/* 행사 포스터 */}
+      <Hotspot {...state("posters")} {...shared} label={[-4.45, 3.4, 1.05]}>
+        <EventPosters />
       </Hotspot>
 
       {/* 왼쪽 벽 책장 */}
-      <Hotspot {...state("books")} {...shared} label={[-3.9, 2.95, 1]}>
-        <group position={[-4.3, 0, 1]}>
+      <group position={[-4.3, 0, 1]}>
           <Block size={[0.8, 0.1, 2.3]} position={[0, 0.5, 0]} color="#6c4f36" />
           <Block size={[0.8, 0.1, 2.3]} position={[0, 1.25, 0]} color="#6c4f36" />
           <Block size={[0.8, 0.1, 2.3]} position={[0, 2, 0]} color="#6c4f36" />
@@ -213,12 +277,18 @@ export default function BasementFloor({ interactive, seen, activeStoryId, onSele
           {["#3f6fa8", "#b84a39", "#c8c1af", "#4f8a63"].map((color, i) => (
             <Block key={color} size={[0.5, 0.5, 0.26]} position={[0.02, 1.55, -0.3 + i * 0.32]} color={color} />
           ))}
-        </group>
-      </Hotspot>
+      </group>
 
       {/* 구석 상자 */}
       <Block size={[1.1, 0.8, 0.9]} position={[-3.6, 0.4, -2.4]} color="#8d7048" />
-      <Block size={[0.8, 0.55, 0.7]} position={[-3.7, 1.07, -2.45]} rotation={[0, 0.25, 0]} color="#a0845a" />
+
+      {/* 플래시 작업대: 상자 위 작은 모니터 */}
+      <Hotspot {...state("flash")} {...shared} label={[-3.6, 2.1, -2.4]}>
+        <group position={[-3.6, 1.16, -2.4]}>
+          <Block size={[0.9, 0.72, 0.7]} position={[0, 0, 0]} color="#cfc6b2" />
+          <FlashScreen />
+        </group>
+      </Hotspot>
     </group>
   );
 }

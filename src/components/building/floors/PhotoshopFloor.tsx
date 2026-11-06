@@ -127,6 +127,49 @@ function SliceSheet() {
   );
 }
 
+// 벽에 건 행사 현수막
+function PrintBanner() {
+  const texture = useCanvasTexture(760, 150, (ctx) => {
+    ctx.fillStyle = "#1f5fa8";
+    ctx.fillRect(0, 0, 760, 150);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "800 64px Pretendard, sans-serif";
+    ctx.fillText("설명회 · 세미나 · 박람회", 38, 98);
+  });
+  return (
+    <mesh position={[-2.75, 2.95, -3.08]}>
+      <planeGeometry args={[2.5, 0.5]} />
+      <meshStandardMaterial map={texture} roughness={0.85} />
+    </mesh>
+  );
+}
+
+// 세워 둔 X배너
+function XBanner() {
+  const texture = useCanvasTexture(220, 560, (ctx) => {
+    ctx.fillStyle = "#fbf6ea";
+    ctx.fillRect(0, 0, 220, 560);
+    ctx.fillStyle = "#e0663f";
+    ctx.fillRect(0, 0, 220, 170);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "800 42px Pretendard, sans-serif";
+    ctx.fillText("X배너", 28, 104);
+    ctx.fillStyle = "#3a3f4b";
+    [230, 280, 330, 380].forEach((y, i) => ctx.fillRect(28, y, 164 - i * 22, 16));
+  });
+  return (
+    <group position={[-3.5, 0, -2.5]}>
+      <mesh position={[0, 1.08, 0]} castShadow>
+        <planeGeometry args={[0.72, 1.84]} />
+        <meshStandardMaterial map={texture} side={2} roughness={0.8} />
+      </mesh>
+      <Block size={[0.05, 2.02, 0.05]} position={[0.38, 1.01, -0.05]} color="#50545e" />
+      <Block size={[0.05, 2.02, 0.05]} position={[-0.38, 1.01, -0.05]} color="#50545e" />
+      <Block size={[0.9, 0.04, 0.28]} position={[0, 0.03, -0.05]} color="#50545e" />
+    </group>
+  );
+}
+
 export default function PhotoshopFloor({ interactive, seen, activeStoryId, onSelectStory }: FloorSceneProps) {
   const shared = { enabled: interactive, onSelect: onSelectStory };
   const state = (id: string) => ({ id, seen: seen.has(id), active: activeStoryId === id });
@@ -156,6 +199,17 @@ export default function PhotoshopFloor({ interactive, seen, activeStoryId, onSel
       <Block size={[1.05, 0.05, 0.36]} position={[-1.2, 1.09, -1.4]} color="#e6e6e8" />
       <Block size={[0.72, 0.04, 0.46]} position={[0.2, 1.08, -1.42]} color="#2a2a30" />
       <Block size={[0.03, 0.03, 0.42]} position={[0.2, 1.13, -1.42]} rotation={[0, 0.6, 0]} color="#d9d9de" />
+
+      {/* 화면 밖 작업물: 현수막, X배너, 홍보용 부채 */}
+      <PrintBanner />
+      <XBanner />
+      <group position={[0.85, 1.075, -1.55]} rotation={[-Math.PI / 2, 0, 0.5]}>
+        <mesh position={[0, 0.2, 0]} castShadow>
+          <circleGeometry args={[0.26, 24]} />
+          <meshStandardMaterial color="#f2a65a" side={2} roughness={0.8} />
+        </mesh>
+        <Block size={[0.04, 0.34, 0.02]} position={[0, -0.2, 0]} color="#e8e0d0" />
+      </group>
 
       {/* 슬라이스 출력물 */}
       <Hotspot {...state("slice")} {...shared} label={[-4.5, 3.2, -1.45]}>

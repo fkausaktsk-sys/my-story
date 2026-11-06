@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import * as THREE from "three";
 
 type Vec3 = [number, number, number];
@@ -53,5 +53,28 @@ export function useCanvasTexture(width: number, height: number, draw: (ctx: Canv
   }, [width, height]);
 
   useEffect(() => () => texture.dispose(), [texture]);
+  return texture;
+}
+
+// 이미지 파일을 3D 재질로 불러옵니다. 불러오는 동안은 null입니다
+export function useImageTexture(src: string) {
+  const [texture, setTexture] = useState<THREE.Texture | null>(null);
+
+  useEffect(() => {
+    let loaded: THREE.Texture | null = null;
+    let cancelled = false;
+    new THREE.TextureLoader().load(src, (result) => {
+      result.colorSpace = THREE.SRGBColorSpace;
+      result.anisotropy = 4;
+      loaded = result;
+      if (cancelled) result.dispose();
+      else setTexture(result);
+    });
+    return () => {
+      cancelled = true;
+      loaded?.dispose();
+    };
+  }, [src]);
+
   return texture;
 }
