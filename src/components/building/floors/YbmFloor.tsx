@@ -7,12 +7,23 @@ import ver2 from "@/assets/ver-2.jpg";
 import ver3 from "@/assets/ver-3.jpg";
 import ver4 from "@/assets/ver-4.jpg";
 import ver5 from "@/assets/ver-5.jpg";
-import type { FloorSceneProps } from "@/components/building/floors/BasementFloor";
+import { EarbudCase, Laptop, Plant, Poster, SketchBook, Sticky, ToolIcon } from "@/components/building/decor";
+import type { FloorSceneProps } from "@/components/building/floors/types";
 import { Chair, Desk, Monitor } from "@/components/building/furniture";
 import Hotspot from "@/components/building/Hotspot";
 import { Block, useCanvasTexture, useImageTexture } from "@/components/building/parts";
 
+// 4F · 2018~: 와이비엠넷. YBM Books 리뉴얼이 중심이고, 그 전 8년의 프로젝트를 한쪽 벽에 모았습니다
+
 const FLIP_SECONDS = 2.6;
+
+const DRAWER_COLORS = [
+  ["#2f6fde", "#6f9fee", "#b9d0f7"],
+  ["#1fa37a", "#68c6a8", "#b7e5d5"],
+  ["#e5a33d", "#efc47f", "#f7e2bf"],
+  ["#d9586a", "#e897a2", "#f4cdd2"],
+];
+
 
 // 메인 시안이 다섯 번 바뀌는 벽
 function VersionWall() {
@@ -37,7 +48,7 @@ function VersionWall() {
   const texture = textures[index];
 
   return (
-    <group position={[-2.95, 2.3, -3.06]}>
+    <group position={[-2.95, 2.3, -4.26]}>
       <Block size={[2.34, 1.5, 0.06]} position={[0, 0, 0]} color="#10131e" />
       {texture && (
         <mesh position={[0, 0.03, 0.035]}>
@@ -91,7 +102,7 @@ function PrototypeScreen() {
     ctx.fillText("띄면 좋겠어요", 378, 316);
   });
   return (
-    <group position={[-4.85, 2.25, -1.25]} rotation={[0, Math.PI / 2, 0]}>
+    <group position={[-6.35, 2.25, -1.25]} rotation={[0, Math.PI / 2, 0]}>
       <Block size={[2.2, 1.34, 0.07]} position={[0, 0, 0]} color="#11141f" />
       <mesh position={[0, 0, 0.045]}>
         <planeGeometry args={[2.08, 1.22]} />
@@ -131,7 +142,7 @@ function AiGallery() {
     ctx.strokeRect(216, 216, 188, 188);
   });
   return (
-    <group position={[0.75, 2.35, -3.07]}>
+    <group position={[0.75, 2.35, -4.27]}>
       <Block size={[1.32, 1.32, 0.06]} position={[0, 0, 0]} color="#10131e" />
       <mesh position={[0, 0, 0.035]}>
         <planeGeometry args={[1.24, 1.24]} />
@@ -168,7 +179,123 @@ function TerminalScreen() {
   );
 }
 
-export default function AiFloor({ interactive, seen, activeStoryId, onSelectStory }: FloorSceneProps) {
+// 인터뷰 내용을 붙여 정리한 벽
+function InterviewWall() {
+  const texture = useCanvasTexture(640, 400, (ctx) => {
+    ctx.fillStyle = "#f8f8f4";
+    ctx.fillRect(0, 0, 640, 400);
+    ctx.fillStyle = "#3e4a50";
+    ctx.font = "700 26px Pretendard, sans-serif";
+    ["누가 쓰나요", "어디서 막히나요", "무엇을 해야 하나요"].forEach((title, column) => {
+      ctx.fillStyle = "#3e4a50";
+      ctx.fillText(title, 18 + column * 212, 42);
+      const colors = ["#ffe680", "#ffc9b8", "#bfe9cf", "#c6dbff"];
+      for (let row = 0; row < 3; row += 1) {
+        ctx.fillStyle = colors[(column + row) % colors.length];
+        ctx.fillRect(18 + column * 212, 62 + row * 108, 186, 94);
+        ctx.fillStyle = "rgba(50, 50, 50, 0.45)";
+        ctx.fillRect(32 + column * 212, 84 + row * 108, 130, 8);
+        ctx.fillRect(32 + column * 212, 106 + row * 108, 92, 8);
+      }
+    });
+  });
+  return (
+    <group position={[3.1, 2.35, -4.26]}>
+      <Block size={[2.3, 1.48, 0.05]} position={[0, 0, 0]} color="#ffffff" />
+      <mesh position={[0, 0, 0.03]}>
+        <planeGeometry args={[2.2, 1.38]} />
+        <meshBasicMaterial map={texture} toneMapped={false} />
+      </mesh>
+    </group>
+  );
+}
+
+// 매일 쓰는 학습 화면을 띄운 태블릿
+function LearningTablet() {
+  const texture = useCanvasTexture(300, 400, (ctx) => {
+    ctx.fillStyle = "#fbfcff";
+    ctx.fillRect(0, 0, 300, 400);
+    ctx.fillStyle = "#3f9fb5";
+    ctx.fillRect(0, 0, 300, 72);
+    ctx.fillStyle = "#ffffff";
+    ctx.font = "700 28px Pretendard, sans-serif";
+    ctx.fillText("오늘의 학습", 22, 46);
+    ["#ffd98a", "#b8e6c9", "#c6dbff"].forEach((color, i) => {
+      ctx.fillStyle = color;
+      ctx.fillRect(22, 96 + i * 92, 256, 76);
+    });
+  });
+  return (
+    <group position={[3.75, 1.72, -3.95]} rotation={[-0.35, -0.2, 0]} scale={0.8}>
+      <Block size={[0.62, 0.82, 0.04]} position={[0, 0, 0]} color="#30333c" />
+      <mesh position={[0, 0, 0.023]}>
+        <planeGeometry args={[0.56, 0.76]} />
+        <meshBasicMaterial map={texture} toneMapped={false} />
+      </mesh>
+    </group>
+  );
+}
+
+// 색과 부품이 칸마다 정리된 서랍장
+function DrawerCabinet() {
+  return (
+    <group position={[3.1, 0, -4.03]} rotation={[0, -Math.PI / 2, 0]} scale={0.7}>
+      <Block size={[0.72, 2, 2.1]} position={[0, 1, 0]} color="#f2f3f0" />
+      {DRAWER_COLORS.flatMap((row, rowIndex) =>
+        row.map((color, column) => (
+          <group key={color} position={[0.37, 1.72 - rowIndex * 0.47, -0.66 + column * 0.66]}>
+            <Block size={[0.04, 0.4, 0.58]} position={[0, 0, 0]} color={color} />
+            <Block size={[0.05, 0.05, 0.18]} position={[0.03, 0, 0]} color="#ffffff" />
+          </group>
+        )),
+      )}
+    </group>
+  );
+}
+
+// Books 리뉴얼의 디자인 토큰을 뽑아 붙인 포스터
+function TokenPoster() {
+  return (
+    <Poster
+      position={[-5.3, 2.3, -4.27]}
+      size={[1.4, 1.1]}
+      canvas={[560, 440]}
+      frame="#10131e"
+      draw={(ctx) => {
+        ctx.fillStyle = "#0f1420";
+        ctx.fillRect(0, 0, 560, 440);
+        ctx.fillStyle = "#9aa7bd";
+        ctx.font = "600 24px Consolas, monospace";
+        ctx.fillText("variables.css", 24, 42);
+        const tokens: [string, string][] = [
+          ["--color-primary", "#3b5bfd"],
+          ["--color-accent", "#e5484d"],
+          ["--color-text", "#26232b"],
+          ["--space-4", "16px"],
+          ["--radius-m", "12px"],
+        ];
+        tokens.forEach(([name, value], i) => {
+          const y = 96 + i * 66;
+          if (value.startsWith("#")) {
+            ctx.fillStyle = value;
+            ctx.fillRect(24, y - 30, 40, 40);
+          } else {
+            ctx.strokeStyle = "#74f0a2";
+            ctx.lineWidth = 3;
+            ctx.strokeRect(24, y - 30, 40, 40);
+          }
+          ctx.fillStyle = "#f1f1ee";
+          ctx.font = "600 24px Consolas, monospace";
+          ctx.fillText(name, 82, y);
+          ctx.fillStyle = "#74f0a2";
+          ctx.fillText(value, 360, y);
+        });
+      }}
+    />
+  );
+}
+
+export default function YbmFloor({ interactive, seen, activeStoryId, onSelectStory }: FloorSceneProps) {
   const shared = { enabled: interactive, onSelect: onSelectStory };
   const state = (id: string) => ({ id, seen: seen.has(id), active: activeStoryId === id });
 
@@ -191,16 +318,38 @@ export default function AiFloor({ interactive, seen, activeStoryId, onSelectStor
         <meshStandardMaterial color="#e8e0d0" roughness={0.5} />
       </mesh>
 
-      <Hotspot {...state("versions")} {...shared} label={[-2.95, 3.3, -2.85]}>
+      <Hotspot {...state("versions")} {...shared} label={[-2.95, 3.3, -4.05]}>
         <VersionWall />
       </Hotspot>
 
-      <Hotspot {...state("prototype")} {...shared} label={[-4.45, 3.2, -1.25]}>
+      <Hotspot {...state("prototype")} {...shared} label={[-5.95, 3.2, -1.25]}>
         <PrototypeScreen />
       </Hotspot>
 
-      <Hotspot {...state("ai-image")} {...shared} label={[0.75, 3.3, -2.85]}>
+      <Hotspot {...state("ai-image")} {...shared} label={[0.75, 3.3, -4.05]}>
         <AiGallery />
+      </Hotspot>
+
+      {/* 지금의 도구들: 포토샵 → 피그마 → 코드 → AI 순서로 왼쪽부터 읽힙니다 */}
+      {(["spark", "code", "figma", "ps"] as const).map((tool, i) => (
+        <ToolIcon key={tool} tool={tool} position={[-6.33, 2.6, 0.6 + i * 0.85]} rotation={[0, Math.PI / 2, 0]} size={0.6} />
+      ))}
+      <TokenPoster />
+      <Plant position={[-5.6, 0, -3.7]} leaf="#2f7d4f" pot="#e9e6de" size={1.2} />
+
+      {/* 책상: 노트북, 와이어프레임 공책, 무선 이어폰, 모니터의 명도 대비 메모 */}
+      <Laptop position={[-2.0, 1.06, -1.85]} rotation={[0, 0.35, 0]} />
+      <SketchBook position={[0.95, 1.06, -1.4]} rotation={[0, -0.2, 0]} />
+      <EarbudCase position={[0.25, 1.06, -1.3]} />
+      <Sticky position={[-0.02, 1.5, -2.04]} rotation={[0, 0, 0.08]} color="#c6dbff" lines={["대비", "4.5:1"]} />
+
+      {/* 8년의 프로젝트: 인터뷰 벽, 학습 태블릿, 디자인 시스템 서랍장 */}
+      <Hotspot {...state("projects")} {...shared} label={[3.1, 3.3, -4.05]}>
+        <group>
+          <InterviewWall />
+          <DrawerCabinet />
+          <LearningTablet />
+        </group>
       </Hotspot>
 
       {/* 회의용 의자 */}

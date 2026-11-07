@@ -4,6 +4,7 @@ import dynamic from "next/dynamic";
 import Link from "next/link";
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import Dock from "@/components/ui/Dock";
+import FloorHeader from "@/components/ui/FloorHeader";
 import StoryCard from "@/components/ui/StoryCard";
 import { floors } from "@/data/floors";
 
@@ -37,6 +38,8 @@ export default function Experience() {
   const [rotated, setRotated] = useState(false);
   const [hasRotated, setHasRotated] = useState(false);
   const [viewResetKey, setViewResetKey] = useState(0);
+  // 층 요약은 새 층에 도착할 때마다 펼쳐 둡니다
+  const [summaryOpen, setSummaryOpen] = useState(true);
   const webgl = useSyncExternalStore(subscribeNothing, canUseWebGL, () => true);
 
   const floor = floors[floorIndex];
@@ -66,6 +69,7 @@ export default function Experience() {
     setOpenStoryId(null);
     setMoving(true);
     setFloorIndex(index);
+    setSummaryOpen(true);
   };
 
   if (!webgl || contextLost) {
@@ -103,12 +107,12 @@ export default function Experience() {
           <h1 className="mt-5 max-w-xl text-4xl font-bold leading-[1.2] tracking-tight md:text-6xl">
             그때 우리는
             <br />
-            표로 화면을
+            table로 화면을
             <br />
             그렸습니다.
           </h1>
           <p className="mt-6 max-w-md text-lg leading-relaxed text-muted">
-            2010년 지하 작업실에서 계단을 따라 지금까지. 끝까지 3~5분이면 충분합니다.
+            2010년 table 코딩부터 AI와 일하는 지금까지, 다섯 층을 계단으로 올라갑니다. 끝까지 3분이면 충분합니다.
           </p>
           <div className="mt-10 flex flex-wrap gap-3">
             <button
@@ -127,14 +131,12 @@ export default function Experience() {
 
       {started && (
         <>
-          <header className="glass absolute left-3 top-3 max-w-[calc(100vw-7.5rem)] rounded-2xl px-4 py-2.5 md:left-6 md:top-6 md:max-w-md md:rounded-3xl md:px-6 md:py-3">
-            <p className="text-sm font-bold">
-              <span className="text-accent">{floor.label}</span>
-              <span className="ml-2 font-medium text-muted">{floor.era}</span>
-            </p>
-            <h2 className="mt-0.5 text-sm font-medium md:text-base">{floor.title}</h2>
-            <p className="mt-1 text-xs leading-relaxed text-muted md:text-sm">{floor.tools.join(" · ")}</p>
-          </header>
+          <FloorHeader
+            floor={floor}
+            compact={Boolean(openStory) || moving}
+            open={summaryOpen}
+            onToggle={() => setSummaryOpen((open) => !open)}
+          />
           <Link
             href="/read"
             className="glass absolute right-3 top-3 rounded-full px-4 py-2.5 text-sm font-medium md:right-6 md:top-6 md:px-5 md:py-3"

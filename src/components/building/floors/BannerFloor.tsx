@@ -3,7 +3,8 @@
 import { useFrame } from "@react-three/fiber";
 import { useMemo, useRef } from "react";
 import * as THREE from "three";
-import type { FloorSceneProps } from "@/components/building/floors/BasementFloor";
+import { Can, ColorChips, ParcelBox, Poster, SmartPhone, Sticky, ToolIcon } from "@/components/building/decor";
+import type { FloorSceneProps } from "@/components/building/floors/types";
 import { Chair, Desk, Monitor } from "@/components/building/furniture";
 import Hotspot from "@/components/building/Hotspot";
 import { Block, useCanvasTexture } from "@/components/building/parts";
@@ -16,7 +17,7 @@ const BANNERS = [
 ];
 
 // 벨트 시작과 끝 위치, 지나가는 배너 수
-const BELT = { x: -4.25, start: 2.7, end: -2.5, count: 6, speed: 0.75 };
+const BELT = { x: -5.75, start: 2.7, end: -2.5, count: 6, speed: 0.75 };
 
 // 배너 한 장의 그림
 function useBannerTexture(index: number) {
@@ -112,7 +113,7 @@ function BrokenTable() {
     [0.5, -0.62],
   ];
   return (
-    <group position={[0.9, 2.3, -3.06]}>
+    <group position={[0.9, 2.3, -4.26]}>
       <Block size={[1.62, 1.62, 0.05]} position={[0, -0.12, 0]} color="#d9dee0" />
       {cells.map(([x, y]) => (
         <Block key={`${x}-${y}`} size={[0.44, 0.44, 0.06]} position={[x, y, 0.04]} color="#8d9aa3" />
@@ -196,6 +197,87 @@ function PinnedBanner({ index, position }: { index: number; position: [number, n
   );
 }
 
+// 배너 규격표. 같은 배너를 크기별로 몇 벌씩 만들었습니다
+function BannerSizeGuide() {
+  return (
+    <Poster
+      position={[-6.36, 2.78, 0.1]}
+      rotation={[0, Math.PI / 2, 0]}
+      size={[1.9, 0.78]}
+      canvas={[760, 312]}
+      frame="#d9dee0"
+      draw={(ctx) => {
+        ctx.fillStyle = "#ffffff";
+        ctx.fillRect(0, 0, 760, 312);
+        ctx.fillStyle = "#1d2a33";
+        ctx.font = "800 34px Pretendard, sans-serif";
+        ctx.fillText("배너 규격표", 24, 48);
+        const rows: [string, string, number][] = [
+          ["메인 배너", "980 × 400", 300],
+          ["띠 배너", "980 × 80", 300],
+          ["기획전 썸네일", "300 × 300", 120],
+          ["모바일 배너", "640 × 300", 220],
+        ];
+        rows.forEach(([name, px, w], i) => {
+          const y = 92 + i * 54;
+          ctx.fillStyle = ["#e5484d", "#3d7bf0", "#f2c230", "#2fb38a"][i];
+          ctx.fillRect(24, y - 30, w, 38);
+          ctx.fillStyle = "#1d2a33";
+          ctx.font = "700 26px Pretendard, sans-serif";
+          ctx.fillText(name, 360, y - 4);
+          ctx.font = "600 26px Consolas, monospace";
+          ctx.fillText(px, 560, y - 4);
+        });
+      }}
+    />
+  );
+}
+
+// 이번 달 기획전 일정을 적은 화이트보드
+function PromoBoard() {
+  return (
+    <Poster
+      position={[-5.35, 2.3, -4.27]}
+      size={[1.5, 1.1]}
+      canvas={[600, 440]}
+      frame="#9aa3ab"
+      draw={(ctx) => {
+        ctx.fillStyle = "#f7f9fa";
+        ctx.fillRect(0, 0, 600, 440);
+        ctx.fillStyle = "#1f4f9c";
+        ctx.font = "800 40px Pretendard, sans-serif";
+        ctx.fillText("이번 달 기획전", 24, 56);
+        ctx.font = "600 30px Pretendard, sans-serif";
+        [
+          ["월", "시즌오프 메인 교체", true],
+          ["화", "패션팀 기획전 3건", true],
+          ["수", "띠배너 12종", false],
+          ["목", "뉴스레터 발송", false],
+          ["금", "주말 특가 오픈!", false],
+        ].forEach(([day, task, done], i) => {
+          const y = 116 + i * 62;
+          ctx.fillStyle = "#e5484d";
+          ctx.fillText(String(day), 28, y);
+          ctx.fillStyle = "#26303a";
+          ctx.fillText(String(task), 86, y);
+          ctx.strokeStyle = "#26303a";
+          ctx.lineWidth = 3;
+          ctx.strokeRect(520, y - 28, 34, 34);
+          if (done) {
+            ctx.strokeStyle = "#2fb38a";
+            ctx.lineWidth = 6;
+            ctx.beginPath();
+            ctx.moveTo(526, y - 12);
+            ctx.lineTo(536, y);
+            ctx.lineTo(552, y - 26);
+            ctx.stroke();
+          }
+        });
+      }}
+    />
+  );
+}
+
 export default function BannerFloor({ interactive, seen, activeStoryId, onSelectStory }: FloorSceneProps) {
   const shared = { enabled: interactive, onSelect: onSelectStory };
   const state = (id: string) => ({ id, seen: seen.has(id), active: activeStoryId === id });
@@ -231,6 +313,26 @@ export default function BannerFloor({ interactive, seen, activeStoryId, onSelect
         </mesh>
       ))}
 
+      {/* 그 시절 도구들: 포토샵, 일러스트, 드림위버 */}
+      <ToolIcon tool="ps" position={[2.3, 2.5, -4.23]} size={0.6} />
+      <ToolIcon tool="ai" position={[3.0, 2.5, -4.23]} size={0.6} />
+      <ToolIcon tool="dw" position={[3.7, 2.5, -4.23]} size={0.6} />
+      <BannerSizeGuide />
+      <PromoBoard />
+
+      {/* 스마트폰, 야근의 에너지 음료, 컬러칩, 모니터에 붙인 메모 */}
+      <SmartPhone position={[-2.05, 1.06, -1.45]} rotation={[0, 0.3, 0]} />
+      <Can position={[1.0, 1.06, -2.25]} />
+      <Can position={[1.18, 1.06, -2.08]} color="#2f6fde" />
+      <ColorChips position={[-1.95, 1.06, -2.3]} rotation={[0, 0.5, 0]} />
+      <Sticky position={[0.709, 1.52, -1.965]} rotation={[0, -0.12, 0.08]} lines={["IE8", "확인"]} />
+      <Sticky position={[-1.888, 2.27, -1.965]} rotation={[0, 0.12, -0.1]} color="#b6ecc4" lines={["크롬", "OK"]} />
+
+      {/* 쌓여 있는 택배 상자 */}
+      <ParcelBox position={[3.0, 0, -3.65]} />
+      <ParcelBox position={[3.05, 0.5, -3.6]} size={[0.55, 0.4, 0.45]} rotation={[0, 0.2, 0]} />
+      <ParcelBox position={[2.2, 0, -3.8]} size={[0.6, 0.35, 0.5]} rotation={[0, -0.3, 0]} />
+
       {/* 벽에 붙은 지난 배너들 */}
       {[
         [-3.75, 2.75],
@@ -240,14 +342,14 @@ export default function BannerFloor({ interactive, seen, activeStoryId, onSelect
         [-2.95, 2.2],
         [-2.15, 2.2],
       ].map(([x, y], i) => (
-        <PinnedBanner key={`${x}-${y}`} index={i} position={[x, y, -3.09]} />
+        <PinnedBanner key={`${x}-${y}`} index={i} position={[x, y, -4.29]} />
       ))}
 
-      <Hotspot {...state("belt")} {...shared} label={[-4.25, 2.3, 0.1]}>
+      <Hotspot {...state("belt")} {...shared} label={[-5.75, 2.3, 0.1]}>
         <BannerBelt />
       </Hotspot>
 
-      <Hotspot {...state("div")} {...shared} label={[0.9, 3.35, -2.85]}>
+      <Hotspot {...state("div")} {...shared} label={[0.9, 3.35, -4.05]}>
         <BrokenTable />
       </Hotspot>
     </group>

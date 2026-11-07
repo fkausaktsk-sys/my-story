@@ -20,36 +20,33 @@ type Look = {
 
 // 층마다 다른 팀원 2~3명. 시대가 바뀌면 함께 일하는 사람도 바뀝니다
 const TEAMS: Look[][] = [
+  // 1F: table과 포토샵으로 일하던 첫 사무실
   [
     { role: "사수", shirt: "#4f7fb5", pants: "#2c3347", hair: "#1f1a18", skin: "#efc7a3", style: "short", glasses: true },
     { role: "개발자", shirt: "#6f8f5e", pants: "#3b3a44", hair: "#2d221c", skin: "#e9bd97", style: "cap" },
-  ],
-  [
     { role: "팀장님", shirt: "#8a5a9e", pants: "#2f3040", hair: "#30241e", skin: "#f1cba8", style: "bun" },
-    { role: "기획자", shirt: "#d9a441", pants: "#39425c", hair: "#171412", skin: "#ecc29d", style: "short" },
-    { role: "개발자", shirt: "#4e9a93", pants: "#343441", hair: "#2a1f19", skin: "#e6b993", style: "short", glasses: true },
   ],
+  // 2F: 오픈마켓
   [
     { role: "MD", shirt: "#c9604f", pants: "#2e3548", hair: "#3a2a20", skin: "#f0c8a4", style: "long" },
     { role: "디자이너", shirt: "#5b78c7", pants: "#3a3a46", hair: "#191614", skin: "#ebc09b", style: "cap" },
   ],
+  // 3F: 관공서 캠페인
   [
     { role: "마케터", shirt: "#d4789a", pants: "#2f3546", hair: "#2b201b", skin: "#f1caa7", style: "bun" },
     { role: "개발자", shirt: "#5e8a70", pants: "#37363f", hair: "#1c1815", skin: "#e8bc96", style: "short", glasses: true },
-    { role: "PM", shirt: "#7a6fc0", pants: "#30384c", hair: "#35261e", skin: "#edc39f", style: "short" },
+    { role: "기획자", shirt: "#7a6fc0", pants: "#30384c", hair: "#35261e", skin: "#edc39f", style: "short" },
   ],
-  [
-    { role: "UX 리서처", shirt: "#3f9fb5", pants: "#2e3446", hair: "#231b17", skin: "#f0c9a5", style: "long", glasses: true },
-    { role: "개발자", shirt: "#b5864f", pants: "#393843", hair: "#1a1613", skin: "#e7bb95", style: "short" },
-  ],
+  // 4F: 와이비엠넷
   [
     { role: "기획자", shirt: "#9d7bd0", pants: "#2d3446", hair: "#2a1f1a", skin: "#efc6a2", style: "bun" },
     { role: "개발자", shirt: "#4c8fcf", pants: "#33343f", hair: "#181512", skin: "#e9be98", style: "cap" },
-    { role: "디자이너", shirt: "#d98a5e", pants: "#39415a", hair: "#3b2a20", skin: "#f1cba8", style: "long" },
+    { role: "고객사", shirt: "#3f9fb5", pants: "#2e3446", hair: "#231b17", skin: "#f0c9a5", style: "long", glasses: true },
   ],
+  // 5F: 아직 만나지 않은 다음 동료
   [
-    { role: "동료", shirt: "#6d8fc4", pants: "#2e3446", hair: "#231b17", skin: "#efc6a2", style: "short" },
-    { role: "동료", shirt: "#c98aa8", pants: "#363542", hair: "#2f231c", skin: "#ecc29d", style: "long" },
+    { role: "다음 동료?", shirt: "#6d8fc4", pants: "#2e3446", hair: "#231b17", skin: "#efc6a2", style: "short" },
+    { role: "다음 동료?", shirt: "#c98aa8", pants: "#363542", hair: "#2f231c", skin: "#ecc29d", style: "long" },
   ],
 ];
 

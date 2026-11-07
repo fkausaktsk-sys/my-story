@@ -2,20 +2,23 @@ import { floorBaseY } from "@/data/floors";
 
 export type Point = { x: number; y: number; z: number };
 
+// 사무실 크기(가로 x, 세로 z). 방 가운데가 원점입니다
+export const ROOM = { width: 13, depth: 8.8, wall: 0.2 };
+
 // 계단실: 방 오른쪽 띠. 모든 층의 계단은 앞에서 뒤로 오릅니다
 export const STAIR = {
-  x: 4.3,
+  x: 5.8,
   width: 1.2,
-  landingZ: 2.7,
+  landingZ: 2.9,
   footZ: 2.1,
-  bandStart: 3.6,
+  bandStart: 5.1,
   steps: 12,
 };
 
 // 층에 도착하면 앉는 책상 앞 자리
 export const SEAT = { x: -0.6, z: -0.25 };
 // 계단실 옆 복도와, 책상을 돌아가기 위해 거치는 지점
-const WALKWAY_X = 3.2;
+const WALKWAY_X = 4.6;
 const AISLE = { x: 2.2, z: 0.7 };
 
 const at = (floor: number, x: number, z: number): Point => ({ x, y: floorBaseY(floor), z });

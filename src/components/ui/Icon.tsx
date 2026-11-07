@@ -1,6 +1,6 @@
 import type { IconName } from "@/data/floors";
 
-type Name = IconName | "stairs" | "list";
+type Name = IconName | "stairs" | "stairs-down" | "list";
 
 // 선 아이콘: 외부 아이콘 라이브러리 없이 필요한 것만 그립니다
 const PATHS: Record<Name, React.ReactNode> = {
@@ -100,6 +100,7 @@ const PATHS: Record<Name, React.ReactNode> = {
     </>
   ),
   stairs: <path d="M3 20h5v-5h5v-5h5V5h3" />,
+  "stairs-down": <path d="M3 5h3v5h5v5h5v5h5" />,
   list: <path d="M4 6h16M4 12h16M4 18h16" />,
 };
 

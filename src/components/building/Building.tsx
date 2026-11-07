@@ -4,53 +4,33 @@ import { useFrame } from "@react-three/fiber";
 import { useRef } from "react";
 import * as THREE from "three";
 import Character from "@/components/building/Character";
-import AiFloor from "@/components/building/floors/AiFloor";
 import BannerFloor from "@/components/building/floors/BannerFloor";
-import BasementFloor, { type FloorSceneProps } from "@/components/building/floors/BasementFloor";
-import PhotoshopFloor from "@/components/building/floors/PhotoshopFloor";
-import ResponsiveFloor from "@/components/building/floors/ResponsiveFloor";
-import SystemFloor from "@/components/building/floors/SystemFloor";
+import CampaignFloor from "@/components/building/floors/CampaignFloor";
+import FirstFloor from "@/components/building/floors/FirstFloor";
+import NextFloor from "@/components/building/floors/NextFloor";
+import type { FloorSceneProps } from "@/components/building/floors/types";
+import YbmFloor from "@/components/building/floors/YbmFloor";
 import Teammates from "@/components/building/Teammates";
-import { Block, useCanvasTexture } from "@/components/building/parts";
-import { FLOOR_HEIGHT, type Floor, floorBaseY, floors } from "@/data/floors";
+import { Block } from "@/components/building/parts";
+import { FLOOR_HEIGHT, floorBaseY, floors } from "@/data/floors";
 import { avatar } from "@/lib/avatar";
-import { STAIR } from "@/lib/route";
+import { ROOM, STAIR } from "@/lib/route";
 
-const ROOM = { width: 10, depth: 6.4, wall: 0.2 };
-
+// 층마다 꾸민 장면: 1F table·포토샵, 2F 오픈마켓 배너, 3F 관공서 캠페인, 4F YBM, 5F 다음 층
 const FLOOR_SCENES: Record<string, React.ComponentType<FloorSceneProps>> = {
-  b1: BasementFloor,
-  "1f": PhotoshopFloor,
+  "1f": FirstFloor,
   "2f": BannerFloor,
-  "3f": ResponsiveFloor,
-  "4f": SystemFloor,
-  "5f": AiFloor,
+  "3f": CampaignFloor,
+  "4f": YbmFloor,
+  "5f": NextFloor,
 };
 
 type Props = FloorSceneProps & {
+  started: boolean;
   floorIndex: number;
   reduced: boolean;
   onArrive: () => void;
 };
-
-// 벽에 붙는 층 표지
-function FloorSign({ floor }: { floor: Floor }) {
-  const texture = useCanvasTexture(512, 256, (ctx) => {
-    ctx.fillStyle = "#f4f1e8";
-    ctx.fillRect(0, 0, 512, 256);
-    ctx.fillStyle = "#1a1d2b";
-    ctx.font = "800 120px Pretendard, sans-serif";
-    ctx.fillText(floor.label, 32, 124);
-    ctx.font = "600 38px Pretendard, sans-serif";
-    ctx.fillText(floor.title.slice(0, 13), 32, 200);
-  });
-  return (
-    <mesh position={[0, 2.1, -ROOM.depth / 2 + 0.13]}>
-      <planeGeometry args={[3.2, 1.6]} />
-      <meshStandardMaterial map={texture} roughness={0.9} />
-    </mesh>
-  );
-}
 
 // 층 뼈대: 방 바닥, 뒤쪽 두 벽, 계단참. 계단이 지나는 자리는 뚫려 있습니다
 function RoomShell({ color, solidBand }: { color: string; solidBand: boolean }) {
@@ -76,6 +56,51 @@ function RoomShell({ color, solidBand }: { color: string; solidBand: boolean }) 
       )}
       <Block size={[width, height, wall]} position={[0, height / 2, -depth / 2]} color={color} />
       <Block size={[wall, height, depth]} position={[left, height / 2, 0]} color={color} />
+    </>
+  );
+}
+
+const CEILING = "#d9d3c6";
+
+// 앞쪽과 오른쪽 벽, 천장: 안쪽 면만 그려서 바깥(아이소메트릭 카메라)에서는 보이지 않고,
+// 1인칭으로 방 안을 걸을 때만 보입니다. 클릭과 그림자에는 끼어들지 않습니다
+function InnerWalls({ color }: { color: string }) {
+  const { width, depth } = ROOM;
+  const height = FLOOR_HEIGHT - 0.2;
+  const noRaycast = () => null;
+  const left = -width / 2;
+  const roomWidth = STAIR.bandStart - left;
+  const bandWidth = width / 2 - STAIR.bandStart;
+  const bandX = STAIR.bandStart + bandWidth / 2;
+  const landing = depth / 2 - STAIR.footZ;
+  const landingZ = STAIR.footZ + landing / 2;
+  const ceiling: { size: [number, number]; center: [number, number] }[] = [
+    { size: [roomWidth, depth], center: [left + roomWidth / 2, 0] },
+    { size: [bandWidth, landing], center: [bandX, landingZ] },
+    { size: [bandWidth, landing], center: [bandX, -landingZ] },
+  ];
+  return (
+    <>
+      <mesh position={[0, height / 2, depth / 2]} rotation={[0, Math.PI, 0]} raycast={noRaycast} receiveShadow>
+        <planeGeometry args={[width, height]} />
+        <meshStandardMaterial color={color} roughness={0.9} />
+      </mesh>
+      <mesh position={[width / 2, height / 2, 0]} rotation={[0, -Math.PI / 2, 0]} raycast={noRaycast} receiveShadow>
+        <planeGeometry args={[depth, height]} />
+        <meshStandardMaterial color={color} roughness={0.9} />
+      </mesh>
+      {/* 천장: 계단이 지나는 구멍만 비워 둡니다 */}
+      {ceiling.map(({ size, center }) => (
+        <mesh
+          key={center.join()}
+          position={[center[0], height, center[1]]}
+          rotation={[Math.PI / 2, 0, 0]}
+          raycast={noRaycast}
+        >
+          <planeGeometry args={size} />
+          <meshStandardMaterial color={CEILING} roughness={0.95} />
+        </mesh>
+      ))}
     </>
   );
 }
@@ -125,26 +150,16 @@ function Stairs() {
   );
 }
 
-// 아직 내용이 없는 층: 공사 자재를 쌓아 둡니다
-function ConstructionProps({ floor }: { floor: Floor }) {
-  return (
-    <>
-      <FloorSign floor={floor} />
-      <Block size={[1.2, 0.8, 0.9]} position={[-2.8, 0.4, 0.4]} color="#9a7a4f" />
-      <Block size={[0.9, 0.6, 0.8]} position={[-1.7, 0.3, 1.1]} color="#8a6b43" />
-      <Block size={[0.7, 0.5, 0.7]} position={[-2.7, 1.05, 0.5]} color="#a98a5c" />
-      <pointLight position={[-1, 2.8, 0]} color="#ffe2b0" intensity={18} distance={10} decay={1.7} />
-    </>
-  );
-}
-
-// 현재 층과 캐릭터가 있는 곳까지만 지어집니다
+// 시작 화면: 현재 층과 캐릭터가 있는 곳까지만 지어집니다.
+// 들어간 뒤: 사무실 안만 보이도록 현재 층만 남깁니다
 function FloorStage({
   index,
+  started,
   floorIndex,
   children,
 }: {
   index: number;
+  started: boolean;
   floorIndex: number;
   children: React.ReactNode;
 }) {
@@ -153,8 +168,13 @@ function FloorStage({
   useFrame((_, delta) => {
     const group = groupRef.current;
     if (!group) return;
-    const top = Math.max(floorBaseY(floorIndex), avatar.y + 0.6);
-    const next = THREE.MathUtils.damp(group.scale.y, floorBaseY(index) <= top ? 1 : 0, 6, delta);
+    const base = floorBaseY(index);
+    let show: boolean;
+    if (!started) show = base <= Math.max(floorBaseY(floorIndex), avatar.y + 0.6);
+    // 계단을 걷는 동안: 발밑 층과 그 아래층만. 위층은 도착할 때 지어지듯 나타납니다
+    else if (avatar.moving) show = base <= avatar.y + 0.05 && base > avatar.y - FLOOR_HEIGHT - 0.1;
+    else show = index === floorIndex;
+    const next = THREE.MathUtils.damp(group.scale.y, show ? 1 : 0, 6, delta);
     group.scale.y = next;
     group.visible = next > 0.01;
   });
@@ -166,33 +186,20 @@ function FloorStage({
   );
 }
 
-// 지면과 흙: B1을 땅속 단면처럼 보이게 합니다
+// 1층 주변의 지면: 건물이 길가에 서 있는 것처럼 보도와 연석을 깝니다
 function Ground() {
   const { width, depth } = ROOM;
-  const top = FLOOR_HEIGHT;
-  const back = -depth / 2 - 0.1;
-  const left = -width / 2 - 0.1;
-  const extent = 9;
+  const extent = 7;
   return (
-    <group position={[0, -top, 0]}>
-      <Block size={[width + extent, 1.2, depth + extent]} position={[-extent / 2, -0.8, -extent / 2]} color="#6b4f38" />
-      <Block
-        size={[width + extent, top, extent]}
-        position={[-extent / 2, top / 2 - 0.2, back - extent / 2]}
-        color="#75583f"
-      />
-      <Block size={[extent, top, depth]} position={[left - extent / 2, top / 2 - 0.2, 0]} color="#75583f" />
-      <Block
-        size={[width + extent, 0.16, extent]}
-        position={[-extent / 2, top - 0.12, back - extent / 2]}
-        color="#3b3e4a"
-      />
-      <Block size={[extent, 0.16, depth]} position={[left - extent / 2, top - 0.12, 0]} color="#3b3e4a" />
+    <group>
+      <Block size={[width + extent * 2, 0.3, depth + extent * 2]} position={[0, -0.36, 0]} color="#252a3b" />
+      <Block size={[width + 1.6, 0.06, depth + 1.6]} position={[0, -0.18, 0]} color="#3a3f52" />
     </group>
   );
 }
 
 export default function Building({
+  started,
   floorIndex,
   reduced,
   onArrive,
@@ -207,19 +214,16 @@ export default function Building({
       {floors.map((floor, index) => {
         const FloorScene = FLOOR_SCENES[floor.id];
         return (
-          <FloorStage key={floor.id} index={index} floorIndex={floorIndex}>
+          <FloorStage key={floor.id} index={index} started={started} floorIndex={floorIndex}>
             <RoomShell color={floor.wall} solidBand={index === 0} />
+            {started && <InnerWalls color={floor.wall} />}
             {index < floors.length - 1 && <Stairs />}
-            {FloorScene ? (
-              <FloorScene
-                interactive={interactive && floorIndex === index}
-                seen={seen}
-                activeStoryId={activeStoryId}
-                onSelectStory={onSelectStory}
-              />
-            ) : (
-              <ConstructionProps floor={floor} />
-            )}
+            <FloorScene
+              interactive={interactive && floorIndex === index}
+              seen={seen}
+              activeStoryId={activeStoryId}
+              onSelectStory={onSelectStory}
+            />
           </FloorStage>
         );
       })}

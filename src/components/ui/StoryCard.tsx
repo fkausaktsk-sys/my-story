@@ -60,6 +60,22 @@ export default function StoryCard({ story, onClose }: Props) {
         )}
       </div>
 
+      {story.items && (
+        <ol className="mt-5 space-y-4 border-t border-white/15 pt-4">
+          {story.items.map((item) => (
+            <li key={item.title}>
+              <p className="font-semibold">{item.title}</p>
+              {item.then.map((line) => (
+                <p key={line} className="mt-1 text-[15px] leading-relaxed">
+                  {line}
+                </p>
+              ))}
+              <p className="mt-1 text-sm leading-relaxed text-muted">{item.now}</p>
+            </li>
+          ))}
+        </ol>
+      )}
+
       <div className="mt-5 border-t border-white/15 pt-4">
         <p className="text-xs font-bold tracking-wide text-[#a9c2ff]">지금</p>
         <p className="mt-2 leading-relaxed text-muted">{story.now}</p>

@@ -12,11 +12,12 @@ type Props = {
   onSelectStory: (id: string) => void;
 };
 
-// 하단 도크: 이 층의 소품과 계단 이동
+// 하단 도크: 이 층의 소품과 계단 이동(내려가기, 올라가기)
 export default function Dock({ currentIndex, moving, seen, onMove, onSelectStory }: Props) {
   const [listOpen, setListOpen] = useState(false);
   const floor = floors[currentIndex];
   const next = floors[currentIndex + 1];
+  const previous = floors[currentIndex - 1];
   const allSeen = floor.stories.every((story) => seen.has(story.id));
 
   const move = (index: number) => {
@@ -81,6 +82,17 @@ export default function Dock({ currentIndex, moving, seen, onMove, onSelectStory
 
         {floor.stories.length > 0 && <span aria-hidden className="my-2 w-px shrink-0 md:mx-1 bg-white/15" />}
 
+        {/* 내려가기는 보조 동작이라 흰 글씨로, 올라가기(노란 글씨) 왼쪽에 둡니다 */}
+        {previous && (
+          <button
+            type="button"
+            onClick={() => move(currentIndex - 1)}
+            className="flex w-15 shrink-0 flex-col items-center gap-1 rounded-2xl px-0.5 py-2 text-[11px] font-medium leading-tight text-foreground transition-colors hover:bg-white/10 md:w-22 md:px-1 md:text-[13px]"
+          >
+            <Icon name="stairs-down" />
+            <span className="text-center">{previous.label}로 내려가기</span>
+          </button>
+        )}
         {next && (
           <button
             type="button"

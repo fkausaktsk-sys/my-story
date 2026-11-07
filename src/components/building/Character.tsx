@@ -1,6 +1,6 @@
 "use client";
 
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { useEffect, useRef } from "react";
 import * as THREE from "three";
 import { useCanvasTexture } from "@/components/building/parts";
@@ -20,8 +20,24 @@ const HAIR = "#2a1e1a";
 const PANTS = "#34405e";
 
 // 샛별 캐릭터: 계단을 걸어 다니고, 도착하면 책상에 앉아 일합니다
+// 원근 카메라(사무실 안)에서는 거리와 상관없이 화면에서 같은 크기로 보이게 합니다.
+// 시야각 60도일 때의 크기이고, 들어가기 연출처럼 시야각이 바뀌면 그만큼 보정합니다
+const PERSPECTIVE_TAG = 0.12;
+const TAG_HALF_TAN = Math.tan(THREE.MathUtils.degToRad(30));
+
 // 머리 위 이름표. 항상 카메라를 향합니다
 export function NameTag({ text, y = 2.05, size = 1 }: { text: string; y?: number; size?: number }) {
+  const perspective = useThree((state) => (state.camera as THREE.PerspectiveCamera).isPerspectiveCamera === true);
+  const sprite = useRef<THREE.Sprite>(null);
+  useFrame(({ camera }) => {
+    const tag = sprite.current;
+    if (!tag) return;
+    const lens = camera as THREE.PerspectiveCamera;
+    const scale = lens.isPerspectiveCamera
+      ? (size * PERSPECTIVE_TAG * Math.tan(THREE.MathUtils.degToRad(lens.fov) / 2)) / TAG_HALF_TAN
+      : size;
+    tag.scale.set(1.33 * scale, 0.4 * scale, 1);
+  });
   const texture = useCanvasTexture(320, 96, (ctx) => {
     ctx.fillStyle = "rgba(20, 24, 42, 0.82)";
     ctx.strokeStyle = "rgba(255, 255, 255, 0.35)";
@@ -37,8 +53,15 @@ export function NameTag({ text, y = 2.05, size = 1 }: { text: string; y?: number
     ctx.fillText(text, 160, 50);
   });
   return (
-    <sprite position={[0, y, 0]} scale={[1.33 * size, 0.4 * size, 1]} renderOrder={10}>
-      <spriteMaterial map={texture} transparent depthTest={false} toneMapped={false} />
+    <sprite ref={sprite} position={[0, y, 0]} scale={[1.33 * size, 0.4 * size, 1]} renderOrder={10}>
+      <spriteMaterial
+        key={String(perspective)}
+        map={texture}
+        transparent
+        depthTest={false}
+        toneMapped={false}
+        sizeAttenuation={!perspective}
+      />
     </sprite>
   );
 }
@@ -99,6 +122,7 @@ export default function Character({ floorIndex, reduced, onArrive }: Props) {
           if (segment.current >= route.current.length) {
             route.current = null;
             state.moving = false;
+            Object.assign(state.dir, { x: 0, y: 0, z: -1 });
             onArrive();
           }
         } else {
@@ -108,6 +132,9 @@ export default function Character({ floorIndex, reduced, onArrive }: Props) {
           state.z += dz * ratio;
           budget = 0;
           if (Math.hypot(dx, dz) > 0.001) heading.current = Math.atan2(dx, dz);
+          state.dir.x = dx / distance;
+          state.dir.y = dy / distance;
+          state.dir.z = dz / distance;
         }
       }
     }
@@ -178,18 +205,19 @@ export default function Character({ floorIndex, reduced, onArrive }: Props) {
             <sphereGeometry args={[0.32, 20, 20]} />
             <meshStandardMaterial color={SKIN} roughness={0.75} />
           </mesh>
-          <mesh position={[0, 0.07, -0.05]} scale={[1.07, 0.98, 1.05]} castShadow>
-            <sphereGeometry args={[0.32, 20, 20, 0, Math.PI * 2, 0, Math.PI * 0.62]} />
-            <meshStandardMaterial color={HAIR} roughness={0.9} />
+          {/* 턱선 단발: 뒤통수 전체를 감싸는 머리, 턱까지 내려오는 아랫단, 옆으로 넘긴 앞머리 */}
+          <mesh position={[0, 0.05, -0.08]} scale={[1.06, 1, 1]} castShadow>
+            <sphereGeometry args={[0.335, 24, 24]} />
+            <meshStandardMaterial color={HAIR} roughness={0.85} />
           </mesh>
-          {/* 어깨 아래로 내려오는 긴 머리와 앞머리 */}
-          <mesh position={[0, -0.26, -0.13]} scale={[1.02, 1.5, 0.62]} castShadow>
-            <sphereGeometry args={[0.3, 18, 18]} />
-            <meshStandardMaterial color={HAIR} roughness={0.9} />
+          {/* 아랫단은 귀 뒤와 뒷목만 덮어 턱과 얼굴선은 드러나게 합니다 */}
+          <mesh position={[0, -0.15, -0.15]} scale={[1.14, 0.72, 0.78]} castShadow>
+            <sphereGeometry args={[0.3, 20, 20]} />
+            <meshStandardMaterial color={HAIR} roughness={0.85} />
           </mesh>
-          <mesh position={[0, 0.17, 0.2]} rotation={[0.55, 0, 0]} scale={[0.9, 0.34, 0.5]} castShadow>
+          <mesh position={[0.06, 0.2, 0.17]} rotation={[0.6, 0, -0.25]} scale={[0.95, 0.32, 0.5]} castShadow>
             <sphereGeometry args={[0.3, 16, 16]} />
-            <meshStandardMaterial color={HAIR} roughness={0.9} />
+            <meshStandardMaterial color={HAIR} roughness={0.85} />
           </mesh>
           {/* 눈과 볼 */}
           <mesh position={[-0.11, 0.0, 0.3]}>
@@ -211,7 +239,7 @@ export default function Character({ floorIndex, reduced, onArrive }: Props) {
         </group>
       </group>
 
-      <NameTag key={floorIndex} text={`샛별 · ${floors[floorIndex].era.length > 4 ? floors[floorIndex].label : floors[floorIndex].era}`} />
+      <NameTag key={floorIndex} text={`샛별 · ${floors[floorIndex].label}`} />
     </group>
   );
 }
