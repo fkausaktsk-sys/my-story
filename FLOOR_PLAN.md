@@ -57,4 +57,4 @@
 5. 캠페인 사이트 실제 링크를 일화에 넣을지
    - 2026-11-06 확인 결과 seoul2017, KoSEA, tourcrowdfunding은 응답했다
    - ggpolicy2017은 404였다
-6. 5F 이메일 주소를 공개해도 되는지 (지금은 이력서의 nastar36@naver.com)
+6. 연락처 이메일: fkausaktsk@gmail.com (확정)

@@ -7,6 +7,7 @@ import { useCanvasTexture } from "@/components/building/parts";
 import { floorBaseY, floors } from "@/data/floors";
 import { avatar } from "@/lib/avatar";
 import { buildRoute, type Point, SEAT } from "@/lib/route";
+import { sound } from "@/lib/sound";
 
 type Props = {
   floorIndex: number;
@@ -80,6 +81,8 @@ export default function Character({ floorIndex, reduced, onArrive }: Props) {
   const speed = useRef(3);
   const currentFloor = useRef(floorIndex);
   const seated = useRef(1);
+  // 다리가 앞뒤로 바뀌는 순간마다 발소리를 냅니다
+  const stride = useRef(0);
   const heading = useRef(Math.PI);
 
   useEffect(() => {
@@ -154,6 +157,9 @@ export default function Character({ floorIndex, reduced, onArrive }: Props) {
     }
 
     const swing = walking ? Math.sin(t * 11) : 0;
+    const foot = Math.sign(swing);
+    if (walking && foot !== 0 && foot !== stride.current) sound.step(Math.abs(state.dir.y) > 0.2);
+    stride.current = foot;
     if (legL.current) legL.current.rotation.x = swing * 0.75 - sit * 1.5;
     if (legR.current) legR.current.rotation.x = -swing * 0.75 - sit * 1.5;
     if (armL.current) armL.current.rotation.x = -swing * 0.6 - sit * (1.25 + Math.sin(t * 13) * 0.1);

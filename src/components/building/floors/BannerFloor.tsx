@@ -278,9 +278,9 @@ function PromoBoard() {
   );
 }
 
-export default function BannerFloor({ interactive, seen, activeStoryId, onSelectStory }: FloorSceneProps) {
+export default function BannerFloor({ interactive, seen, activeStoryId, hintId, onSelectStory }: FloorSceneProps) {
   const shared = { enabled: interactive, onSelect: onSelectStory };
-  const state = (id: string) => ({ id, seen: seen.has(id), active: activeStoryId === id });
+  const state = (id: string) => ({ id, seen: seen.has(id), active: activeStoryId === id, hinted: hintId === id });
 
   return (
     <group>

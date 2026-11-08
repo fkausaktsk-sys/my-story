@@ -206,6 +206,7 @@ export default function Building({
   interactive,
   seen,
   activeStoryId,
+  hintId,
   onSelectStory,
 }: Props) {
   return (
@@ -222,6 +223,7 @@ export default function Building({
               interactive={interactive && floorIndex === index}
               seen={seen}
               activeStoryId={activeStoryId}
+              hintId={hintId}
               onSelectStory={onSelectStory}
             />
           </FloorStage>

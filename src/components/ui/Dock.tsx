@@ -8,12 +8,14 @@ type Props = {
   currentIndex: number;
   moving: boolean;
   seen: ReadonlySet<string>;
+  // 안내 말풍선이 추천하는 다음 이야기
+  hintId: string | null;
   onMove: (index: number) => void;
   onSelectStory: (id: string) => void;
 };
 
 // 하단 도크: 이 층의 소품과 계단 이동(내려가기, 올라가기)
-export default function Dock({ currentIndex, moving, seen, onMove, onSelectStory }: Props) {
+export default function Dock({ currentIndex, moving, seen, hintId, onMove, onSelectStory }: Props) {
   const [listOpen, setListOpen] = useState(false);
   const floor = floors[currentIndex];
   const next = floors[currentIndex + 1];
@@ -63,57 +65,70 @@ export default function Dock({ currentIndex, moving, seen, onMove, onSelectStory
         </nav>
       )}
 
-      <div className="glass flex max-w-full items-stretch gap-0.5 overflow-x-auto rounded-3xl p-1.5 [scrollbar-width:none] md:rounded-[2rem] md:p-2">
-        {floor.stories.map((story) => (
-          <button
-            key={story.id}
-            type="button"
-            onClick={() => onSelectStory(story.id)}
-            className="relative flex w-13 shrink-0 flex-col items-center gap-1 rounded-2xl px-0.5 py-2 text-[11px] font-medium leading-tight transition-colors hover:bg-white/10 md:w-22 md:px-1 md:text-[13px]"
-          >
-            <Icon name={story.icon} />
-            <span className="text-center">{story.name}</span>
-            {!seen.has(story.id) && (
-              <span aria-hidden className="absolute right-3 top-1.5 size-2 rounded-full bg-accent" />
-            )}
-            <span className="sr-only">{seen.has(story.id) ? "(봤음)" : "(안 봤음)"}</span>
-          </button>
-        ))}
-
-        {floor.stories.length > 0 && <span aria-hidden className="my-2 w-px shrink-0 md:mx-1 bg-white/15" />}
-
-        {/* 내려가기는 보조 동작이라 흰 글씨로, 올라가기(노란 글씨) 왼쪽에 둡니다 */}
-        {previous && (
-          <button
-            type="button"
-            onClick={() => move(currentIndex - 1)}
-            className="flex w-15 shrink-0 flex-col items-center gap-1 rounded-2xl px-0.5 py-2 text-[11px] font-medium leading-tight text-foreground transition-colors hover:bg-white/10 md:w-22 md:px-1 md:text-[13px]"
-          >
-            <Icon name="stairs-down" />
-            <span className="text-center">{previous.label}로 내려가기</span>
-          </button>
+      {/* 모바일: 위 줄은 이 층 이야기(좌우로 넘김), 아래 줄은 항상 보이는 계단 이동.
+          데스크톱: 한 줄로 두되, 계단 이동은 넘기는 영역 밖에 고정합니다 */}
+      <div className="glass flex w-full max-w-full flex-col gap-1 rounded-3xl p-1.5 md:w-auto md:flex-row md:items-stretch md:gap-0.5 md:rounded-[2rem] md:p-2">
+        {floor.stories.length > 0 && (
+          <div className="relative min-w-0 md:flex md:items-stretch">
+            <div className="flex items-stretch gap-0.5 overflow-x-auto [scrollbar-width:none]">
+              {floor.stories.map((story) => (
+                <button
+                  key={story.id}
+                  type="button"
+                  onClick={() => onSelectStory(story.id)}
+                  className={`relative flex w-15 shrink-0 flex-col items-center gap-1 rounded-2xl px-0.5 py-2 text-[11px] font-medium leading-tight transition-colors hover:bg-white/10 md:w-22 md:px-1 md:text-[13px] ${
+                    hintId === story.id ? "bg-accent/15 text-accent ring-1 ring-accent/60" : ""
+                  }`}
+                >
+                  <Icon name={story.icon} />
+                  <span className="text-center">{story.name}</span>
+                  {!seen.has(story.id) && (
+                    <span aria-hidden className="absolute right-3 top-1.5 size-2 rounded-full bg-accent" />
+                  )}
+                  <span className="sr-only">{seen.has(story.id) ? "(봤음)" : "(안 봤음)"}</span>
+                </button>
+              ))}
+            </div>
+            <span aria-hidden className="mx-1 my-2 hidden w-px shrink-0 bg-white/15 md:block" />
+          </div>
         )}
-        {next && (
+
+        <div className="flex items-stretch gap-1 border-t border-white/10 pt-1 md:shrink-0 md:gap-0.5 md:border-t-0 md:pt-0">
+          {/* 내려가기는 보조 동작이라 흰 글씨로, 올라가기(노란 글씨) 왼쪽에 둡니다 */}
+          {previous && (
+            <button
+              type="button"
+              onClick={() => move(currentIndex - 1)}
+              className="flex shrink-0 items-center justify-center gap-1.5 rounded-2xl px-3 py-2.5 text-xs font-medium leading-tight text-foreground transition-colors hover:bg-white/10 md:w-22 md:flex-col md:gap-1 md:px-1 md:py-2 md:text-[13px]"
+            >
+              <Icon name="stairs-down" className="size-5 md:size-6" />
+              <span className="text-center">{previous.label}로 내려가기</span>
+            </button>
+          )}
+          {next && (
+            <button
+              type="button"
+              onClick={() => move(currentIndex + 1)}
+              className={`flex flex-1 items-center justify-center gap-1.5 rounded-2xl px-3 py-2.5 text-sm font-bold leading-tight transition-colors md:w-22 md:flex-none md:flex-col md:gap-1 md:px-1 md:py-2 md:text-[13px] ${
+                allSeen ? "bg-accent text-background" : "bg-accent/15 text-accent hover:bg-accent/25 md:bg-transparent md:hover:bg-white/10"
+              }`}
+            >
+              <Icon name="stairs" className="size-5 md:size-6" />
+              <span className="text-center">{next.label}로 올라가기</span>
+            </button>
+          )}
           <button
             type="button"
-            onClick={() => move(currentIndex + 1)}
-            className={`flex w-15 shrink-0 flex-col items-center gap-1 rounded-2xl px-0.5 py-2 text-[11px] font-bold leading-tight transition-colors md:w-22 md:px-1 md:text-[13px] ${
-              allSeen ? "bg-accent text-background" : "text-accent hover:bg-white/10"
+            aria-expanded={listOpen}
+            onClick={() => setListOpen((open) => !open)}
+            className={`flex shrink-0 items-center justify-center gap-1.5 rounded-2xl px-3 py-2.5 text-xs font-medium leading-tight transition-colors hover:bg-white/10 md:w-16 md:flex-col md:gap-1 md:px-1 md:py-2 md:text-[13px] ${
+              next ? "" : "flex-1 md:flex-none"
             }`}
           >
-            <Icon name="stairs" />
-            <span className="text-center">{next.label}로 올라가기</span>
+            <Icon name="list" className="size-5 md:size-6" />
+            <span>층 목록</span>
           </button>
-        )}
-        <button
-          type="button"
-          aria-expanded={listOpen}
-          onClick={() => setListOpen((open) => !open)}
-          className="flex w-11 shrink-0 flex-col items-center gap-1 rounded-2xl px-0.5 py-2 text-[11px] font-medium leading-tight transition-colors hover:bg-white/10 md:w-16 md:px-1 md:text-[13px]"
-        >
-          <Icon name="list" />
-          <span>층 목록</span>
-        </button>
+        </div>
       </div>
     </div>
   );

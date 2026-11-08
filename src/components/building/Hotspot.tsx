@@ -9,13 +9,15 @@ type Props = {
   label: [number, number, number];
   seen: boolean;
   active: boolean;
+  // 안내 말풍선이 추천하는 다음 이야기면 표식을 크게 깜빡입니다
+  hinted?: boolean;
   enabled: boolean;
   onSelect: (id: string) => void;
   children: React.ReactNode;
 };
 
 // 누를 수 있는 소품: 위에 뜨는 표식과 눌렀을 때의 살짝 튀는 반응을 담당합니다
-export default function Hotspot({ id, label, seen, active, enabled, onSelect, children }: Props) {
+export default function Hotspot({ id, label, seen, active, hinted = false, enabled, onSelect, children }: Props) {
   const [hovered, setHovered] = useState(false);
   const groupRef = useRef<THREE.Group>(null);
   const markerRef = useRef<THREE.Mesh>(null);
@@ -27,7 +29,8 @@ export default function Hotspot({ id, label, seen, active, enabled, onSelect, ch
     const marker = markerRef.current;
     if (marker) {
       marker.position.y = label[1] + Math.sin(clock.elapsedTime * 2.4) * 0.09;
-      marker.rotation.y += delta * 1.6;
+      marker.rotation.y += delta * (hinted ? 3 : 1.6);
+      marker.scale.setScalar(hinted ? 1.45 + Math.sin(clock.elapsedTime * 5) * 0.25 : 1);
     }
   });
 

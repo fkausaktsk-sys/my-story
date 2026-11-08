@@ -14,6 +14,7 @@ type Props = {
   moving: boolean;
   seen: ReadonlySet<string>;
   activeStoryId: string | null;
+  hintId: string | null;
   onSelectStory: (id: string) => void;
   onArrive: () => void;
   onContextLost: () => void;
@@ -285,6 +286,7 @@ export default function Scene({
   moving,
   seen,
   activeStoryId,
+  hintId,
   onSelectStory,
   onArrive,
   onContextLost,
@@ -324,6 +326,7 @@ export default function Scene({
         interactive={started && !moving}
         seen={seen}
         activeStoryId={activeStoryId}
+        hintId={hintId}
         onSelectStory={onSelectStory}
       />
     </Canvas>

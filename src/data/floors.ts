@@ -339,7 +339,7 @@ export const floors: Floor[] = [
 ];
 
 // 마지막 층에서 보여 주는 연락처
-export const CONTACT_EMAIL = "nastar36@naver.com";
+export const CONTACT_EMAIL = "fkausaktsk@gmail.com";
 
 export const FLOOR_HEIGHT = 3.8;
 

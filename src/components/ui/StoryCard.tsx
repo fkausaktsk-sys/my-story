@@ -6,10 +6,12 @@ import type { Story } from "@/data/floors";
 type Props = {
   story: Story;
   onClose: () => void;
+  // 카드를 닫지 않고 이어서 볼 다음 행동: 다음 이야기 또는 다음 층
+  next?: { label: string; onClick: () => void };
 };
 
 // 일화 카드: 그때의 기억과 지금을 나란히 보여 줍니다
-export default function StoryCard({ story, onClose }: Props) {
+export default function StoryCard({ story, onClose, next }: Props) {
   const closeRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
@@ -80,6 +82,17 @@ export default function StoryCard({ story, onClose }: Props) {
         <p className="text-xs font-bold tracking-wide text-[#a9c2ff]">지금</p>
         <p className="mt-2 leading-relaxed text-muted">{story.now}</p>
       </div>
+
+      {next && (
+        <button
+          type="button"
+          onClick={next.onClick}
+          className="mt-6 flex w-full items-center justify-between rounded-2xl bg-accent px-5 py-3.5 text-left font-semibold text-background transition-opacity hover:opacity-85"
+        >
+          <span>{next.label}</span>
+          <span aria-hidden>→</span>
+        </button>
+      )}
     </section>
   );
 }

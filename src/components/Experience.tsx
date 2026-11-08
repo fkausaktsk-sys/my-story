@@ -5,8 +5,10 @@ import Link from "next/link";
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import Dock from "@/components/ui/Dock";
 import FloorHeader from "@/components/ui/FloorHeader";
+import Guide, { type GuideAction } from "@/components/ui/Guide";
 import StoryCard from "@/components/ui/StoryCard";
-import { floors } from "@/data/floors";
+import { CONTACT_EMAIL, floors, type Story } from "@/data/floors";
+import { sound } from "@/lib/sound";
 
 // 3D 코드는 무거워서 브라우저에서만, 첫 화면 뒤에 불러옵니다
 const Scene = dynamic(() => import("@/components/building/Scene"), { ssr: false });
@@ -36,10 +38,10 @@ export default function Experience() {
   const [seen, setSeen] = useState<ReadonlySet<string>>(() => new Set());
   const [contextLost, setContextLost] = useState(false);
   const [rotated, setRotated] = useState(false);
-  const [hasRotated, setHasRotated] = useState(false);
   const [viewResetKey, setViewResetKey] = useState(0);
   // 층 요약은 새 층에 도착할 때마다 펼쳐 둡니다
   const [summaryOpen, setSummaryOpen] = useState(true);
+  const [soundOn, setSoundOn] = useState(true);
   const webgl = useSyncExternalStore(subscribeNothing, canUseWebGL, () => true);
 
   const floor = floors[floorIndex];
@@ -49,16 +51,27 @@ export default function Experience() {
   );
 
   const selectStory = useCallback((id: string) => {
+    sound.open();
     setOpenStoryId(id);
     setSeen((prev) => new Set(prev).add(id));
   }, []);
   const closeStory = useCallback(() => setOpenStoryId(null), []);
-  const arrive = useCallback(() => setMoving(false), []);
-  const loseContext = useCallback(() => setContextLost(true), []);
-  const changeRotated = useCallback((next: boolean) => {
-    setRotated(next);
-    if (next) setHasRotated(true);
+  const arrive = useCallback(() => {
+    setMoving(false);
+    sound.arrive();
   }, []);
+  // 들어가기를 누른 순간에만 소리를 켤 수 있습니다(브라우저 정책)
+  const enter = () => {
+    setSoundOn(sound.start());
+    setStarted(true);
+  };
+  const toggleSound = () => {
+    const next = !soundOn;
+    sound.setEnabled(next);
+    setSoundOn(next);
+  };
+  const loseContext = useCallback(() => setContextLost(true), []);
+  const changeRotated = useCallback((next: boolean) => setRotated(next), []);
   const resetView = () => {
     setRotated(false);
     setViewResetKey((key) => key + 1);
@@ -71,6 +84,59 @@ export default function Experience() {
     setFloorIndex(index);
     setSummaryOpen(true);
   };
+
+  // ---------- 다음 행동 안내 ----------
+  // 수동적인 유저도 멈추지 않도록, 지금 할 일을 항상 하나만 골라 보여 줍니다
+  const nextFloor = floors[floorIndex + 1];
+  const unseen = floor.stories.filter((story) => !seen.has(story.id));
+  const seenCount = floor.stories.length - unseen.length;
+  const hintId = unseen[0]?.id ?? null;
+  const goUp: GuideAction | undefined = nextFloor
+    ? { label: `${nextFloor.label}로 올라가기`, onClick: () => moveTo(floorIndex + 1) }
+    : undefined;
+
+  let guide: { message: string; sub?: string; action?: GuideAction; secondary?: GuideAction };
+  if (!nextFloor) {
+    guide = {
+      message: "끝까지 올라와 주셔서 감사합니다.",
+      sub: "다음 층을 함께 지을 이야기를 기다리고 있어요.",
+      action: { label: "이메일 보내기", href: `mailto:${CONTACT_EMAIL}` },
+    };
+  } else if (unseen.length === floor.stories.length && unseen[0]) {
+    guide = {
+      message: `${unseen[0].name}부터 볼까요?`,
+      sub:
+        seen.size === 0
+          ? "반짝이는 ◆나 아래 버튼을 눌러도 돼요. 화면을 드래그하면 둘러볼 수 있어요."
+          : `이 층에는 이야기가 ${floor.stories.length}개 있어요.`,
+      action: { label: "이야기 보기", onClick: () => selectStory(unseen[0].id) },
+      secondary: goUp && { ...goUp, label: `${nextFloor.label}로 바로 가기` },
+    };
+  } else if (unseen[0]) {
+    guide = {
+      message: `이 층 이야기가 ${unseen.length}개 남았어요.`,
+      sub: `다음은 '${unseen[0].name}'이에요.`,
+      action: { label: "다음 이야기", onClick: () => selectStory(unseen[0].id) },
+      secondary: goUp,
+    };
+  } else {
+    guide = {
+      message: `${nextFloor.label}로 올라가 볼까요?`,
+      sub: `${nextFloor.era} · ${nextFloor.title}`,
+      action: goUp,
+    };
+  }
+
+  // 일화 카드 아래의 다음 행동: 이 층의 남은 이야기, 다 봤으면 다음 층
+  let cardNext: { label: string; onClick: () => void } | undefined;
+  if (openStory) {
+    const index = floor.stories.indexOf(openStory);
+    const remaining: Story | undefined =
+      floor.stories.slice(index + 1).find((story) => !seen.has(story.id)) ??
+      floor.stories.find((story) => !seen.has(story.id));
+    if (remaining) cardNext = { label: `다음 이야기 · ${remaining.name}`, onClick: () => selectStory(remaining.id) };
+    else if (goUp?.onClick) cardNext = { label: `${nextFloor.label}로 올라가기`, onClick: goUp.onClick };
+  }
 
   if (!webgl || contextLost) {
     return (
@@ -93,6 +159,7 @@ export default function Experience() {
           moving={moving}
           seen={seen}
           activeStoryId={openStoryId}
+          hintId={moving ? null : hintId}
           onSelectStory={selectStory}
           onArrive={arrive}
           onContextLost={loseContext}
@@ -117,7 +184,7 @@ export default function Experience() {
           <div className="mt-10 flex flex-wrap gap-3">
             <button
               type="button"
-              onClick={() => setStarted(true)}
+              onClick={enter}
               className="rounded-full bg-accent px-7 py-3.5 font-semibold text-background transition-opacity hover:opacity-85"
             >
               그때로 들어가기
@@ -133,6 +200,8 @@ export default function Experience() {
         <>
           <FloorHeader
             floor={floor}
+            floorIndex={floorIndex}
+            seenCount={seenCount}
             compact={Boolean(openStory) || moving}
             open={summaryOpen}
             onToggle={() => setSummaryOpen((open) => !open)}
@@ -143,28 +212,41 @@ export default function Experience() {
           >
             글로 읽기
           </Link>
+          <button
+            type="button"
+            onClick={toggleSound}
+            aria-pressed={soundOn}
+            aria-label={soundOn ? "소리 끄기" : "소리 켜기"}
+            className="glass absolute right-3 top-16 flex size-[2.625rem] items-center justify-center rounded-full md:right-[8.5rem] md:top-6 md:size-12"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" className="size-5">
+              <path d="M4 9.5h3.5L12 5.5v13l-4.5-4H4z" />
+              {soundOn ? (
+                <path d="M15.5 9a4 4 0 0 1 0 6M18 6.5a7.5 7.5 0 0 1 0 11" />
+              ) : (
+                <path d="M16 9.5l5 5M21 9.5l-5 5" />
+              )}
+            </svg>
+          </button>
           {rotated && (
             <button
               type="button"
               onClick={resetView}
-              className="glass absolute right-3 top-16 rounded-full px-4 py-2.5 text-sm font-medium md:right-6 md:top-22 md:px-5 md:py-3"
+              className="glass absolute right-3 top-29 rounded-full px-4 py-2.5 text-sm font-medium md:right-6 md:top-22 md:px-5 md:py-3"
             >
               원래 시점
             </button>
           )}
-          {!hasRotated && !moving && !openStory && (
-            <p className="glass pointer-events-none absolute bottom-29 left-1/2 -translate-x-1/2 whitespace-nowrap rounded-full px-4 py-2 text-xs font-medium md:bottom-32">
-              드래그해서 둘러보기
-            </p>
-          )}
+          {!moving && !openStory && <Guide {...guide} />}
           <Dock
             currentIndex={floorIndex}
             moving={moving}
             seen={seen}
+            hintId={hintId}
             onMove={moveTo}
             onSelectStory={selectStory}
           />
-          {openStory && <StoryCard story={openStory} onClose={closeStory} />}
+          {openStory && <StoryCard key={openStory.id} story={openStory} onClose={closeStory} next={cardNext} />}
         </>
       )}
     </main>
