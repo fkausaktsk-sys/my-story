@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import Dock from "@/components/ui/Dock";
 import FloorHeader from "@/components/ui/FloorHeader";
+import FloorIntro from "@/components/ui/FloorIntro";
 import Guide, { type GuideAction } from "@/components/ui/Guide";
 import StoryCard from "@/components/ui/StoryCard";
 import { CONTACT_EMAIL, floors, type Story } from "@/data/floors";
@@ -39,8 +40,8 @@ export default function Experience() {
   const [contextLost, setContextLost] = useState(false);
   const [rotated, setRotated] = useState(false);
   const [viewResetKey, setViewResetKey] = useState(0);
-  // 층 요약은 새 층에 도착할 때마다 펼쳐 둡니다
-  const [summaryOpen, setSummaryOpen] = useState(true);
+  // 층 소개 카드는 새 층에 도착할 때마다 먼저 보여 줍니다
+  const [introOpen, setIntroOpen] = useState(true);
   const [soundOn, setSoundOn] = useState(true);
   const webgl = useSyncExternalStore(subscribeNothing, canUseWebGL, () => true);
 
@@ -72,6 +73,11 @@ export default function Experience() {
   };
   const loseContext = useCallback(() => setContextLost(true), []);
   const changeRotated = useCallback((next: boolean) => setRotated(next), []);
+  const closeIntro = useCallback(() => setIntroOpen(false), []);
+  const openIntro = () => {
+    setOpenStoryId(null);
+    setIntroOpen(true);
+  };
   const resetView = () => {
     setRotated(false);
     setViewResetKey((key) => key + 1);
@@ -82,7 +88,7 @@ export default function Experience() {
     setOpenStoryId(null);
     setMoving(true);
     setFloorIndex(index);
-    setSummaryOpen(true);
+    setIntroOpen(true);
   };
 
   // ---------- 다음 행동 안내 ----------
@@ -198,14 +204,10 @@ export default function Experience() {
 
       {started && (
         <>
-          <FloorHeader
-            floor={floor}
-            floorIndex={floorIndex}
-            seenCount={seenCount}
-            compact={Boolean(openStory) || moving}
-            open={summaryOpen}
-            onToggle={() => setSummaryOpen((open) => !open)}
-          />
+          {/* 소개 카드가 떠 있는 동안에는 작은 층 표시를 숨겨 같은 정보가 겹치지 않게 합니다 */}
+          {!(introOpen && !moving) && (
+            <FloorHeader floor={floor} floorIndex={floorIndex} seenCount={seenCount} onOpenIntro={openIntro} />
+          )}
           <Link
             href="/read"
             className="glass absolute right-3 top-3 rounded-full px-4 py-2.5 text-sm font-medium md:right-6 md:top-6 md:px-5 md:py-3"
@@ -237,7 +239,7 @@ export default function Experience() {
               원래 시점
             </button>
           )}
-          {!moving && !openStory && <Guide {...guide} />}
+          {!moving && !openStory && !introOpen && <Guide {...guide} />}
           <Dock
             currentIndex={floorIndex}
             moving={moving}
@@ -247,6 +249,10 @@ export default function Experience() {
             onSelectStory={selectStory}
           />
           {openStory && <StoryCard key={openStory.id} story={openStory} onClose={closeStory} next={cardNext} />}
+          {/* 계단을 다 올라 도착한 뒤에 층 소개를 띄웁니다 */}
+          {introOpen && !moving && (
+            <FloorIntro key={floor.id} floor={floor} floorIndex={floorIndex} onClose={closeIntro} />
+          )}
         </>
       )}
     </main>
