@@ -176,7 +176,7 @@ export default function Experience() {
 
       {!started && (
         <div className="absolute inset-0 flex flex-col justify-center bg-gradient-to-r from-background/90 via-background/25 to-transparent px-6 md:px-16">
-          <p className="text-sm font-medium text-accent">Saetbyul Kim · 15년의 웹 변천사</p>
+          <p className="text-sm font-medium text-accent">Saetbyul Kim · 15년의 UI 디자인 여정</p>
           <h1 className="mt-5 max-w-xl text-4xl font-bold leading-[1.2] tracking-tight md:text-6xl">
             그때 우리는
             <br />

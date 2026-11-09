@@ -3,7 +3,7 @@ import "./globals.css";
 
 export const metadata: Metadata = {
   title: "샛별 빌딩 | Saetbyul Kim",
-  description: "2010년 table 코딩부터 AI와 일하는 지금까지, 한 층씩 올라온 웹 디자이너 김샛별의 15년.",
+  description: "2010년 table 코딩부터 AI와 일하는 지금까지, 한 층씩 올라온 UI 디자이너 김샛별의 15년.",
   // 공개 전까지 검색엔진 색인을 막습니다
   robots: { index: false, follow: false },
 };
